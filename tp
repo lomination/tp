@@ -1,0 +1,134 @@
+#!/bin/bash
+
+
+# Ansi escape codes
+none="\033[0m"
+bold="\033[1m"
+red="\033[31m"
+green="\033[32m"
+
+
+# Show a help message
+show_help() {
+	echo "$0: command to ease the management of your practicals!
+
+COMMANDS
+	${bold}init:$none
+		"
+}
+
+# Create the practical environment
+init() {
+
+	# get needed data
+	intra_page=""
+	git_url=""
+	title=""
+
+	# clone the git repository
+	git clone -o "$title" -- "$git_url"
+
+	cd "$title"
+	# create dotnet solution
+	dotnet new sln --name "$title"
+	# create main project
+	dotnet new console -n "$title" -f net7.0 -lang 'C#'
+	dotnet sln add "$title/$title.csproj"
+	# create test project
+	dotnet new xunit -n "Tests" -f net7.0 -lang 'C#'
+	dotnet sln add "Tests/Tests.csproj"
+	dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj"
+
+	# create utility files
+	echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore
+	echo "$title" > README
+
+	# push on the remote
+	save("First commit")
+
+}
+
+# Push your work on the intra
+save() {
+
+	git add -A
+	if [[ -n "$2" ]]; then
+		git commit -m "$2"
+	else
+		git commit -m "Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+	fi
+	git push
+}
+
+# Run an archi tag
+archi() {
+
+	# choose the names of the commit and the tag in term of the parameters
+	if [[ -n "$2" ]]; then
+		commit="$2"
+		[[ -n "$3" ]] && tag="$3" || tag="$2"
+	else
+		commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+		tag="$commit"
+	fi
+
+	# git add commit tag & push
+	git add -A
+	git commit -m "$commit"
+	git tag -ma "archi-$tag"
+	git push --follow-tags
+
+}
+
+# Submit your work
+sumbit() {
+
+	# ask for user confirmation
+	num=$RANDOM
+	read -p "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit." input
+	[[ input != "$num" ]] && echo "Command canceled" && exit
+
+	# choose the names of the commit and the tag in term of the parameters
+        if [[ -n "$2" ]]; then
+                commit="$2"
+                [[ -n "$3" ]] && tag="$3" || tag="$2"
+        else
+                commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+                tag="$commit"
+        fi
+
+	# git add commit tag & push
+        git add -A
+        git commit -m "$commit"
+        git tag -ma "submit-$tag"
+        git push --follow-tags
+}
+
+
+case "$1" in
+	"init")
+		init
+		exit
+		;;
+	"save")
+		save
+		exit
+		;;
+	"archi")
+		archi
+		exit
+		;;
+	"submit")
+		submit
+		exit
+		;;
+	*"help"*)
+		show_help
+		exit
+		;;
+	*)
+		echo "${red}Error$none: invalid command $bol$1$none."
+		show_help
+		exit
+		;;
+esac

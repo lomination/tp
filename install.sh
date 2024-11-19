@@ -1,0 +1,24 @@
+#!/bin.bash
+
+install() {
+	cd "afs/.bin/"
+	curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > tp
+	chmod +x tp
+}
+
+cd
+if [[ -e "afs/.bin" ]]; then
+	if [[ -d "afs/.bin" ]]; then
+		install
+	else
+		echo "\033[31mERROR\033[0m: $(pwd)/.bin already exists but is not a directory. Consider removing the file, using the manual installation or asking for help to @lomination on Discord."
+		exit 1
+	if
+else
+	mkdir "afs/.bin"
+	install
+fi
+
+if ! [[ $(cat afs/.confs/bashrc) == *'PATH=$PATH:$(pwd)/.bin'* ]]; then
+	echo 'PATH=$PATH:$(pwd)/.bin' >> .confs/bashrc
+fi
