@@ -4,6 +4,7 @@ install() {
 	cd "afs/.bin/"
 	curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > tp
 	chmod +x tp
+	echo "\033[32mInstallation succeeded!\033[32m Make sure to restart you shell before trying."
 }
 
 cd

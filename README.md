@@ -1,5 +1,7 @@
 ## TP: a command to simplify the management of your practicals
 
+**Please note that these scripts come with absolutely no warranty.**
+
 ### Usage
 
 Once properly installed, you can use this tool in your shell by typing `tp`. This script offers various commands: `init`, `save`, `archi`, `submit` and `help`. Check out `tp help` to learn more about how to use the commands.
@@ -12,10 +14,10 @@ If you encounter any problem, feel free to open a github issue or to contact me 
 
 #### PIE
 
-To install this tool on your comuter **in the PIE**, run the following installation script. No admin permissions are needed.
+To install this tool on your computer **of the PIE**, run the following installation script. No admin permissions are needed.
 
 ```bash
-curl ... | bash
+curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/install.sh" | bash
 ```
 
 #### Manual installation

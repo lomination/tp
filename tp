@@ -6,98 +6,181 @@ none="\033[0m"
 bold="\033[1m"
 red="\033[31m"
 green="\033[32m"
+blue="\033[34m"
 
 
 # Show a help message
 show_help() {
-	echo "$0: command to ease the management of your practicals!
 
-COMMANDS
-	${bold}init:$none
-		"
+    case "$2"in
+        "init")
+            echo "$0 ${bold}init$none: \
+
+            The \`$0 init\` command allows you to start your practical. It should be used only once at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default \`.gitignore\` and \`README\` files and finally commits and pushes the work. \
+
+            It takes as parameter the title of the ${bold}current practical's title$none and the ${bold}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site. \
+
+            It can be used as follows: \
+
+            \`$0 init <title> <git_url>\` \
+
+            For instance: \
+
+            \`$0 init GaulishMall firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\`"
+            exit
+            ;;
+        "save")
+            echo "$0 ${bold}save$none: \
+
+            This command is a shortcut for git add, commit and push. \
+            
+            Warning: it adds every current changes in the repository. Make sure to have an appropriate \`.gitignore\` file to avoid pushing trash file on the remote! \
+            
+            It takes as parameter the name of the commit that will be created and pushed. If none is given, a random one is generated for you. \
+
+            For instance: \
+
+            \`$0 save\` \
+
+            \`$0 save \"My beautiful commit <3\"\`"
+            exit
+            ;;
+        "archi")
+            echo "$0 ${bold}archi$none: \
+
+            The \`$0 archi\` submits an \"archi\" tag to the mouli. It adds all the changes in the current repository, commits them, tags the commit with a archi tag, and pushes the commit and the tag. \
+
+            It takes as parameters the name of the commit and the name of the archi tag. Note that the name of the archi tag should not contain the prefix \"archi-\" since it is automaticaly added. \
+            
+            For instance: \
+
+            \`$0 archi \"Fix the last tests\" \"first\" \` \
+
+            When no tag name is given, it is by default set to the commit's name. When both commit's and tag's names are not given, a random name is generated and used for both of them. This allows you to simply: \
+
+            \`$0 archi\`"
+            exit
+            ;;
+        "submit")
+            echo "$0 ${bold}submit$none: \
+
+            The \`$0 submit\` submits a \"submit\" tag to the mouli. It adds all the changes in the current repository, commits them, tags the commit with a submit tag, and pushes the commit and the tag. \
+
+            Make sure you are ready to push a \"submit\" tag before using this command! To avoid mistakes, a confirmation is asked.
+
+            It takes as parameters the name of the commit and the name of the submit tag. Note that the name of the submit tag should not contain the prefix \"submit-\" since it is automaticaly added. \
+            
+            For instance: \
+
+            \`$0 submit \"Fix the last tests\" \"first\" \` \
+
+            When no tag name is given, it is by default set to the commit's name. When both commit's and tag's names are not given, a random name is generated and used for both of them. This allows you to simply: \
+
+            \`$0 submit\`"
+            exit
+            ;;
+        ""|"help")
+            echo "$0 ${bold}help$none: \
+
+            Use \`$0 help <command>\` to learn more about how to use a certain command. \
+
+            Commands: init, save, archi, submit, help"
+            exit
+            ;;
+        *)
+            echo "${red}Error$none: invalid command $bold$1$none. Check out `$0 help` for help."
+            exit
+            ;;
+    esac
+
 }
 
 # Create the practical environment
 init() {
 
-	# get needed data
-	intra_page=""
-	git_url=""
-	title=""
+    # # get needed data
+    # intra_page=$(curl "$2")
+    # git_url=$(echo "$intra_page" | grep -oP '<div class="gitUrl copy-button">\s*<div>[^<]')
+    # title=$(echo "$intra_page" | grep -oP '<h1>[^<]+</h1>')
 
-	# clone the git repository
-	git clone -o "$title" -- "$git_url"
+    title="$2"
+    git_url="$3"
 
-	cd "$title"
-	# create dotnet solution
-	dotnet new sln --name "$title"
-	# create main project
-	dotnet new console -n "$title" -f net7.0 -lang 'C#'
-	dotnet sln add "$title/$title.csproj"
-	# create test project
-	dotnet new xunit -n "Tests" -f net7.0 -lang 'C#'
-	dotnet sln add "Tests/Tests.csproj"
-	dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj"
+    # clone the git repository
+    git clone -o "$title" -- "$git_url"
 
-	# create utility files
-	echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore
-	echo "$title" > README
+    cd "$title"
+    # create dotnet solution
+    dotnet new sln --name "$title"
+    # create main project
+    dotnet new console -n "$title" -f net7.0 -lang 'C#'
+    dotnet sln add "$title/$title.csproj"
+    # create test project
+    dotnet new xunit -n "Tests" -f net7.0 -lang 'C#'
+    dotnet sln add "Tests/Tests.csproj"
+    dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj"
 
-	# push on the remote
-	save("First commit")
+    # create utility files
+    echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore
+    echo "$title" > README
+
+    # push on the remote
+    git add -A
+    git commit -m "First commit"
+    git push
 
 }
 
 # Push your work on the intra
 save() {
 
-	git add -A
-	if [[ -n "$2" ]]; then
-		git commit -m "$2"
-	else
-		git commit -m "Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-	fi
-	git push
+    git add -A
+    if [[ -n "$2" ]]; then
+        git commit -m "$2"
+    else
+        git commit -m "Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+    fi
+    git push
 }
 
 # Run an archi tag
 archi() {
 
-	# choose the names of the commit and the tag in term of the parameters
-	if [[ -n "$2" ]]; then
-		commit="$2"
-		[[ -n "$3" ]] && tag="$3" || tag="$2"
-	else
-		commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-		tag="$commit"
-	fi
+    # choose the names of the commit and the tag in term of the parameters
+    if [[ -n "$2" ]]; then
+        commit="$2"
+        [[ -n "$3" ]] && tag="$3" || tag="$2"
+    else
+        commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+        tag="$commit"
+    fi
 
-	# git add commit tag & push
-	git add -A
-	git commit -m "$commit"
-	git tag -ma "archi-$tag"
-	git push --follow-tags
+    # git add commit tag & push
+    git add -A
+    git commit -m "$commit"
+    git tag -ma "archi-$tag"
+    git push --follow-tags
 
 }
 
 # Submit your work
 sumbit() {
 
-	# ask for user confirmation
-	num=$RANDOM
-	read -p "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit." input
-	[[ input != "$num" ]] && echo "Command canceled" && exit
+    # ask for user confirmation
+    num=$RANDOM
+    read -p "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit." input
+    [[ input != "$num" ]] && echo "Command canceled" && exit
 
-	# choose the names of the commit and the tag in term of the parameters
+    # choose the names of the commit and the tag in term of the parameters
         if [[ -n "$2" ]]; then
-                commit="$2"
-                [[ -n "$3" ]] && tag="$3" || tag="$2"
+            commit="$2"
+            [[ -n "$3" ]] && tag="$3" || tag="$2"
         else
-                commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-                tag="$commit"
+            commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+            tag="$commit"
         fi
 
-	# git add commit tag & push
+    # git add commit tag & push
         git add -A
         git commit -m "$commit"
         git tag -ma "submit-$tag"
@@ -106,29 +189,28 @@ sumbit() {
 
 
 case "$1" in
-	"init")
-		init
-		exit
-		;;
-	"save")
-		save
-		exit
-		;;
-	"archi")
-		archi
-		exit
-		;;
-	"submit")
-		submit
-		exit
-		;;
-	*"help"*)
-		show_help
-		exit
-		;;
-	*)
-		echo "${red}Error$none: invalid command $bol$1$none."
-		show_help
-		exit
-		;;
+    "init")
+        init
+        exit
+        ;;
+    "save")
+        save
+        exit
+        ;;
+    "archi")
+        archi
+        exit
+        ;;
+    "submit")
+        submit
+        exit
+        ;;
+    "help")
+        show_help
+        exit
+        ;;
+    *)
+        echo "${red}Error$none: invalid command $bold$1$none. Check out \`$0 help\` for help."
+        exit
+        ;;
 esac
