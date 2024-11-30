@@ -1,216 +1,426 @@
-#!/bin/bash
+#!/bin/sh
 
 
 # Ansi escape codes
 none="\033[0m"
 bold="\033[1m"
+decrease="\033[2m"
+italics="\033[3m"
+underline="\033[4m"
+reverse="\033[7m"
 red="\033[31m"
 green="\033[32m"
+yellow="\033[33m"
 blue="\033[34m"
+magenta="\033[35m"
+white="\033[37m"
+framed="\033[51m"
+bright_yellow="\033[93m"
+bright_blue="\033[94m"
 
 
-# Show a help message
-show_help() {
+# Styles
+code="$italics$yellow"
+information="$underline"
+title="$bold$reverse"
+note="${bright_blue}NOTE: "
+warn="${bright_yellow}WARNING: "
 
-    case "$2"in
-        "init")
-            echo "$0 ${bold}init$none: \
+# Help messages
+init_doc="
+${title}(DESCRIPTION)$none
 
-            The \`$0 init\` command allows you to start your practical. It should be used only once at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default \`.gitignore\` and \`README\` files and finally commits and pushes the work. \
+    The ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
 
-            It takes as parameter the title of the ${bold}current practical's title$none and the ${bold}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site. \
+${title}(USAGE)$none
 
-            It can be used as follows: \
+    It takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
 
-            \`$0 init <title> <git_url>\` \
+    Usage: ${code}tp init <title> <git_url>${none}
 
-            For instance: \
+${title}(EXAMPLES)$none
 
-            \`$0 init GaulishMall firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\`"
-            exit
-            ;;
-        "save")
-            echo "$0 ${bold}save$none: \
+    ${code}tp init \"GaulishMall\" \"firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\"$none
 
-            This command is a shortcut for git add, commit and push. \
-            
-            Warning: it adds every current changes in the repository. Make sure to have an appropriate \`.gitignore\` file to avoid pushing trash file on the remote! \
-            
-            It takes as parameter the name of the commit that will be created and pushed. If none is given, a random one is generated for you. \
+"
+save_doc="
+${title}(DESCRIPTION)$none
 
-            For instance: \
+    This command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
 
-            \`$0 save\` \
+    ${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
 
-            \`$0 save \"My beautiful commit <3\"\`"
-            exit
-            ;;
-        "archi")
-            echo "$0 ${bold}archi$none: \
+${title}(USAGE)$none
 
-            The \`$0 archi\` submits an \"archi\" tag to the mouli. It adds all the changes in the current repository, commits them, tags the commit with a archi tag, and pushes the commit and the tag. \
+    It takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
 
-            It takes as parameters the name of the commit and the name of the archi tag. Note that the name of the archi tag should not contain the prefix \"archi-\" since it is automaticaly added. \
-            
-            For instance: \
+    Usages:
+    - ${code}tp save <commit_name>${none}
+    - ${code}tp save${none}
 
-            \`$0 archi \"Fix the last tests\" \"first\" \` \
+${title}(EXAMPLES)$none
+    
+    ${code}tp save \"Fix NegaFibonacci encoding algorithm\"$none
+    ${code}tp save$none
 
-            When no tag name is given, it is by default set to the commit's name. When both commit's and tag's names are not given, a random name is generated and used for both of them. This allows you to simply: \
+"
+archi_doc="
+${title}(DESCRIPTION)$none
 
-            \`$0 archi\`"
-            exit
-            ;;
-        "submit")
-            echo "$0 ${bold}submit$none: \
+    The ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
+    
+    ${note}If any changes have been made, then it commits all of them before creating the tag.$none
 
-            The \`$0 submit\` submits a \"submit\" tag to the mouli. It adds all the changes in the current repository, commits them, tags the commit with a submit tag, and pushes the commit and the tag. \
+    ${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
 
-            Make sure you are ready to push a \"submit\" tag before using this command! To avoid mistakes, a confirmation is asked.
+${title}(USAGE)$none
 
-            It takes as parameters the name of the commit and the name of the submit tag. Note that the name of the submit tag should not contain the prefix \"submit-\" since it is automaticaly added. \
-            
-            For instance: \
+    It takes as parameters the ${information}name of the tag$none and the ${information}name of the commit$none that may not be used if no changes has been made.
 
-            \`$0 submit \"Fix the last tests\" \"first\" \` \
+    ${note}The name of the archi tag should not contain the prefix \"archi-\" since it is automatically added.$none
 
-            When no tag name is given, it is by default set to the commit's name. When both commit's and tag's names are not given, a random name is generated and used for both of them. This allows you to simply: \
+    When no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
 
-            \`$0 submit\`"
-            exit
-            ;;
-        ""|"help")
-            echo "$0 ${bold}help$none: \
+    Usages:
+    - ${code}tp archi <tag_name> <commit_name>$none
+    - ${code}tp archi <tag_name>$none
+    - ${code}tp archi$none
 
-            Use \`$0 help <command>\` to learn more about how to use a certain command. \
+${title}(EXAMPLES)$none
 
-            Commands: init, save, archi, submit, help"
-            exit
-            ;;
-        *)
-            echo "${red}Error$none: invalid command $bold$1$none. Check out `$0 help` for help."
-            exit
-            ;;
-    esac
+    ${code}tp archi \"first\" \"Finish the proficiencies\"$none
+    ${code}tp archi \"second\" \"Remove unauthorized classes\"$none
+    ${code}tp archi \"third\"$none
+    ${code}tp archi$none
 
+"
+submit_doc="
+${title}(DESCRIPTION)$none
+
+    The ${code}tp archi$none submits an ${information}submit tag$none to the mouli.
+    
+    ${note}If any changes have been made, then it commits all of them before creating the tag.$none
+
+    ${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+
+    ${warn}Make sure you are ready to push a submit tag before using this command! You sould have already pushed an archi tag that succeeded and you should not have done modification between the archi and the submit tag.$none
+
+${title}(USAGE)$none
+
+    It takes as parameters the ${information}name of the commit$none and the ${information}name of the submit tag$none.
+    
+    ${note}The name of the submit tag should not contain the prefix \"submit-\" since it is automatically added.$none
+
+    When no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
+
+    Usages:
+    - ${code}tp submit <tag_name> <commit_name>$none
+    - ${code}tp submit <tag_name>$none
+    - ${code}tp submit$none
+
+${title}(EXAMPLES)$none
+
+    ${code}tp submit \"adamsromance\" \"Finish the proficiencies\"$none
+    ${code}tp submit \"first\" \"VipOk\"$none
+    ${code}tp submit$none
+
+"
+log_doc="
+${title}(DESCRIPTION)$none
+
+    ${information}Displays the logs$none of the current git repository. It is equivalent to the \"git log\" command, but ${information}way more beautiful!$none
+
+${title}(USAGE)$none
+
+    Usage: ${code}tp log$none
+
+${title}(EXAMPLES)$none
+
+    ${code}tp log$none
+
+"
+help_doc="
+${title}(DESCRIPTION)$none
+
+    ${information}Display the documentation$none associated with a given command.
+
+${title}(USAGE)$none
+
+    It takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none and ${code}help$none.
+
+    Usage: ${code}tp help <command>$none
+
+${title}(EXAMPLES)$none
+
+    ${code}tp help init$none
+    ${code}tp help help$none
+
+"
+
+
+# Utility functions
+fail() {
+    printf "\n$red${bold}FAILURE:$none $1\n"
+    exit 1
+}
+log() {
+    [ -n "$tp_debug" ] \
+        && printf "$decrease$1$none\n"
+}
+success() {
+    printf "\n$green${bold}SUCCESS:$none $1\n"
+    exit 0
 }
 
+
 # Create the practical environment
-init() {
+init_cmd() {
 
     # # get needed data
     # intra_page=$(curl "$2")
     # git_url=$(echo "$intra_page" | grep -oP '<div class="gitUrl copy-button">\s*<div>[^<]')
     # title=$(echo "$intra_page" | grep -oP '<h1>[^<]+</h1>')
 
-    title="$2"
-    git_url="$3"
+    # check if args are given
+    [ -z "$1" ] \
+        && fail "Missing required argument at position 1. Check out ${code}tp help init$none."
+    [ -z "$2" ] \
+        && fail "Missing required argument at position 2. Check out ${code}tp help init$none."
+    title="$1"
+    git_url="$2"
 
     # clone the git repository
-    git clone -o "$title" -- "$git_url"
+    log "Cloning the git repository"
+    git clone "$git_url" "$title" || fail "Failed to clone the repository."
 
+    # go to directory
     cd "$title"
+
     # create dotnet solution
-    dotnet new sln --name "$title"
+    log "Creating the dotnet solution"
+    dotnet new sln --name "$title" || fail "Failed to create dotnet solution."
     # create main project
-    dotnet new console -n "$title" -f net7.0 -lang 'C#'
-    dotnet sln add "$title/$title.csproj"
+    log "Creating the dotnet console project"
+    dotnet new console -n "$title" -f net7.0 -lang 'C#' || fail "Failed to create dotnet console project."
+    log "Adding the dotnet console project to the dotnet solution"
+    dotnet sln add "$title/$title.csproj" || fail "Failed to add the main C# project to the solution."
     # create test project
-    dotnet new xunit -n "Tests" -f net7.0 -lang 'C#'
-    dotnet sln add "Tests/Tests.csproj"
-    dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj"
+    log "Creating the dotnet xunit project"
+    dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || fail "Failed to create the C# xunit test project."
+    log "Adding the dotnet xunit project to the dotnet solution"
+    dotnet sln add "Tests/Tests.csproj" || fail "Failed to add the test project to the solution."
+    log "Adding the reference from the xunit project to the console project"
+    dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj" || fail "Failed to add the reference from the test project to the main one."
 
     # create utility files
-    echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore
-    echo "$title" > README
+    log "Creating the .gitignore file"
+    echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore || fail "Failed to create the .gitignore file."
+    log "Creating the README"
+    echo "$title" > README || fail "Failed to create the README file."
 
     # push on the remote
-    git add -A
-    git commit -m "First commit"
-    git push
+    log "Adding changes to git"
+    git add -A || fail "Failed to git add all the changes."
+    log "Committing added changes"
+    git commit -m "First commit"  || fail "Failed to git commit."
+    log "Pushing the commit to the remote"
+    git push || fail "Failed to git push."
+
+    success "Successfully initialized the practical!"
 
 }
+
 
 # Push your work on the intra
-save() {
+save_cmd() {
 
-    git add -A
-    if [[ -n "$2" ]]; then
-        git commit -m "$2"
+    # testing if there are changes to commit
+    [ $(git status --porcelain | wc -l) -eq "0" ] \
+        && fail "Nothing to push! The save has been canceled."
+
+    # choosing a commit name
+    if [ -n "$1" ]; then
+        log "Setting commit name to the given argument"
+        commit="$1"
     else
-        git commit -m "Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+        log "Generating a commit name"
+        commit="Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
     fi
+
+    # use git
+    log "Adding changes to git"
+    git add -A
+    log "Committing added changes"
+    git commit -m "$commit"
+    log "Pushing the commit to the remote"
     git push
+
+    success "Successfully save the work on the remote!"
 }
 
-# Run an archi tag
-archi() {
 
-    # choose the names of the commit and the tag in term of the parameters
-    if [[ -n "$2" ]]; then
-        commit="$2"
-        [[ -n "$3" ]] && tag="$3" || tag="$2"
+# Run an archi tag
+archi_cmd() {
+
+    # choose the names of the commit and the tag depending on the given parameters
+    if [ -n "$1" ]; then
+        log "Setting commit name to the given argument"
+        commit="$1"
+        if [ -n "$2" ]; then
+            log "Setting tag name to the given argument"
+            tag="$2"
+        else
+            log "Setting tag name to the commit name by default (none has been given)"
+            tag="$1"
+        fi
     else
-        commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+        log "Generating a commit name"
+        commit="$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1)"
+        log "Generating a tag name"
         tag="$commit"
     fi
 
-    # git add commit tag & push
-    git add -A
-    git commit -m "$commit"
+    # git add & commit
+    if [ $(git status --porcelain | wc -l) -ne "0" ]; then
+        log "Adding changes to git"
+        git add -A
+        log "Committing added changes"
+        git commit -m "$commit"
+    fi
+    
+    # git tag & push
+    log "Creating the tag"
     git tag -ma "archi-$tag"
+    log "Pushing the commit and the tag to the remote"
     git push --follow-tags
 
+    success "Successfully pushed an archi tag!"
+
 }
+
 
 # Submit your work
-sumbit() {
+submit_cmd() {
 
     # ask for user confirmation
-    num=$RANDOM
-    read -p "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit." input
-    [[ input != "$num" ]] && echo "Command canceled" && exit
+    log "Generating a number for user confirmation"
+    num=$(shuf -i 100000-999999 -n 1)
+    log "Prompting"
+    printf "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit.\n"
+    log "Waiting for user input"
+    read -p "> " input
+    [ input -ne "$num" ] && printf "${bold}Command canceled!$none\n" && exit
 
-    # choose the names of the commit and the tag in term of the parameters
-        if [[ -n "$2" ]]; then
-            commit="$2"
-            [[ -n "$3" ]] && tag="$3" || tag="$2"
+    # choose the names of the commit and the tag depending on the given parameters
+    if [ -n "$1" ]; then
+        log "Setting commit name to the given argument"
+        commit="$1"
+        if [ -n "$2" ]; then
+            log "Setting tag name to the given argument"
+            tag="$2"
         else
-            commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-            tag="$commit"
+            log "Setting tag name to the commit name by default (none has been given)"
+            tag="$1"
         fi
+    else
+        log "Generating a commit name"
+        commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+        log "Generating a tag name"
+        tag="$commit"
+    fi
 
-    # git add commit tag & push
+    # git add & commit
+    if [ $(git status --porcelain | wc -l) -ne "0" ]; then
+        log "Adding changes to git"
         git add -A
+        log "Committing added changes"
         git commit -m "$commit"
-        git tag -ma "submit-$tag"
-        git push --follow-tags
+    fi
+    
+    # git tag & push
+    log "Creating the tag"
+    git tag -ma "submit-$tag"
+    log "Pushing the commit and the tag to the remote"
+    git push --follow-tags
+
+    success "Successfully pushed an submit tag!"
 }
 
 
+# Show git log
+log_cmd() {
+
+    log "Running git log"
+    git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- || fail "Failed to run git log"
+
+}
+
+
+# Show a help message
+show_help() {
+
+    case "$1" in
+        "init")
+            printf "$init_doc"
+            exit
+            ;;
+        "save")
+            printf "$save_doc"
+            exit
+            ;;
+        "archi")
+            printf "$archi_doc"
+            exit
+            ;;
+        "submit")
+            printf "$submit_doc"
+            exit
+            ;;
+        "log"|"lg")
+            printf "$log_doc"
+            exit
+            ;;
+        ""|"help")
+            printf "$help_doc"
+            exit
+            ;;
+        *)
+            printf "\n${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help.\n\n"
+            exit 1
+            ;;
+    esac
+
+}
+
+
+# Main script
 case "$1" in
     "init")
-        init
+        init_cmd "$2" "$3"
         exit
         ;;
     "save")
-        save
+        save_cmd "$2"
         exit
         ;;
     "archi")
-        archi
+        archi_cmd "$2" "$3"
         exit
         ;;
     "submit")
-        submit
+        submit_cmd "$2" "$3"
+        exit
+        ;;
+    "log"|"lg")
+        log_cmd
         exit
         ;;
     "help")
-        show_help
+        show_help "$2"
         exit
         ;;
     *)
-        echo "${red}Error$none: invalid command $bold$1$none. Check out \`$0 help\` for help."
-        exit
+        printf "\n${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help.\n\n"
+        exit 1
         ;;
 esac
