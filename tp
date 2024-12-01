@@ -6,8 +6,8 @@ logfile=$(mktemp "/tmp/tp-log-XXXXXXXXXXXXXXXXXXXX.log")
 
 
 # Manage outputs redirection
-exec 3>&1         # redirect 3 -> 1
-exec &> $log_file # redirect 1 -> $logfile
+exec 3>&1        # redirect 3 -> 1
+exec &> $logfile # redirect 1 -> $logfile
 
 
 # Ansi escape codes
@@ -165,7 +165,7 @@ ${title}(EXAMPLES)$none
 # Utility functions
 die() {
 
-    echo -e "${red}ERROR: a failure occurred. Check out $logfile for more information about the crash.$none"
+    echo -e "${red}ERROR: a failure occurred. Check out $logfile for more information about the crash.$none" >&3
     exit 1
 
 }
@@ -180,7 +180,7 @@ log() {
 
 success() {
 
-    echo -e "${green}Success!$none"
+    echo -e "$bold${green}Success!$none" >& 3
 
 }
 
@@ -247,7 +247,7 @@ save_cmd() {
 
     # testing if there are changes to commit
     if [[ $(git status --porcelain | wc -l) -eq "0" ]]; then
-        echo -e "${red}Nothing to push, the git working tree is clean. The save has been canceled.$none"
+        echo -e "${red}Nothing to push, the git working tree is clean. The save has been canceled.$none" >&3
         exit 3
     fi
 
@@ -309,10 +309,10 @@ submit_cmd() {
 
     # ask for user confirmation
     num=$(shuf -i 100000-999999 -n 1) 
-    echo -e "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit."
+    echo -e "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit." >&3
     read -p "> " input
     if [[ input -ne "$num" ]]; then
-        echo -e "${bold}Command canceled!$none\n"
+        echo -e "${bold}Command canceled!$none" >&3
         exit 4
     fi
 
@@ -349,7 +349,7 @@ submit_cmd() {
 # Show git log
 log_cmd() {
 
-    git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- || die
+    git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3 || die
 
 }
 
@@ -359,31 +359,31 @@ show_help() {
 
     case "$1" in
         "init")
-            echo -e "$init_doc"
+            echo -e "$init_doc" >&3
             exit
             ;;
         "save")
-            echo -e "$save_doc"
+            echo -e "$save_doc" >&3
             exit
             ;;
         "archi")
-            echo -e "$archi_doc"
+            echo -e "$archi_doc" >&3
             exit
             ;;
         "submit")
-            echo -e "$submit_doc"
+            echo -e "$submit_doc" >&3
             exit
             ;;
         "log"|"lg")
-            echo -e "$log_doc"
+            echo -e "$log_doc" >&3
             exit
             ;;
         ""|"help")
-            echo -e "$help_doc"
+            echo -e "$help_doc" >&3
             exit
             ;;
         *)
-            echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
+            echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help." >&3
             exit 1
             ;;
     esac
@@ -418,7 +418,7 @@ case "$1" in
         exit
         ;;
     *)
-        echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
+        echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help." >&3
         exit 1
         ;;
 esac
