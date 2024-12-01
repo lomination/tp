@@ -1,22 +1,31 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+
+# Manage log file
+logfile=$(mktemp "/tmp/tp-log-XXXXXXXXXXXXXXXXXXXX.log")
+
+
+# Manage outputs redirection
+exec 3>&1         # redirect 3 -> 1
+exec &> $log_file # redirect 1 -> $logfile
 
 
 # Ansi escape codes
-none="\033[0m"
-bold="\033[1m"
-decrease="\033[2m"
-italics="\033[3m"
-underline="\033[4m"
-reverse="\033[7m"
-red="\033[31m"
-green="\033[32m"
-yellow="\033[33m"
-blue="\033[34m"
-magenta="\033[35m"
-white="\033[37m"
-framed="\033[51m"
-bright_yellow="\033[93m"
-bright_blue="\033[94m"
+none='\033[0m'
+bold='\033[1m'
+decrease='\033[2m'
+italics='\033[3m'
+underline='\033[4m'
+reverse='\033[7m'
+red='\033[31m'
+green='\033[32m'
+yellow='\033[33m'
+blue='\033[34m'
+magenta='\033[35m'
+white='\033[37m'
+framed='\033[51m'
+bright_yellow='\033[93m'
+bright_blue='\033[94m'
 
 
 # Styles
@@ -25,6 +34,7 @@ information="$underline"
 title="$bold$reverse"
 note="${bright_blue}NOTE: "
 warn="${bright_yellow}WARNING: "
+
 
 # Help messages
 init_doc="
@@ -41,7 +51,6 @@ ${title}(USAGE)$none
 ${title}(EXAMPLES)$none
 
     ${code}tp init \"GaulishMall\" \"firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\"$none
-
 "
 save_doc="
 ${title}(DESCRIPTION)$none
@@ -62,7 +71,6 @@ ${title}(EXAMPLES)$none
     
     ${code}tp save \"Fix NegaFibonacci encoding algorithm\"$none
     ${code}tp save$none
-
 "
 archi_doc="
 ${title}(DESCRIPTION)$none
@@ -92,7 +100,6 @@ ${title}(EXAMPLES)$none
     ${code}tp archi \"second\" \"Remove unauthorized classes\"$none
     ${code}tp archi \"third\"$none
     ${code}tp archi$none
-
 "
 submit_doc="
 ${title}(DESCRIPTION)$none
@@ -123,7 +130,6 @@ ${title}(EXAMPLES)$none
     ${code}tp submit \"adamsromance\" \"Finish the proficiencies\"$none
     ${code}tp submit \"first\" \"VipOk\"$none
     ${code}tp submit$none
-
 "
 log_doc="
 ${title}(DESCRIPTION)$none
@@ -137,7 +143,6 @@ ${title}(USAGE)$none
 ${title}(EXAMPLES)$none
 
     ${code}tp log$none
-
 "
 help_doc="
 ${title}(DESCRIPTION)$none
@@ -154,22 +159,29 @@ ${title}(EXAMPLES)$none
 
     ${code}tp help init$none
     ${code}tp help help$none
-
 "
 
 
 # Utility functions
-fail() {
-    printf "\n$red${bold}FAILURE:$none $1\n"
+die() {
+
+    echo -e "${red}ERROR: a failure occurred. Check out $logfile for more information about the crash.$none"
     exit 1
+
 }
+
 log() {
-    [ -n "$tp_debug" ] \
-        && printf "$decrease$1$none\n"
+    
+    msg="$1"
+    echo -e "$msg..."                   # echoing to logfile
+    echo -e "$decrease$msg...$none" >&3 # echoing to stdout
+
 }
+
 success() {
-    printf "\n$green${bold}SUCCESS:$none $1\n"
-    exit 0
+
+    echo -e "${green}Success!$none"
+
 }
 
 
@@ -177,56 +189,55 @@ success() {
 init_cmd() {
 
     # # get needed data
-    # intra_page=$(curl "$2")
+    # intra_page=$(curl "$1")
     # git_url=$(echo "$intra_page" | grep -oP '<div class="gitUrl copy-button">\s*<div>[^<]')
     # title=$(echo "$intra_page" | grep -oP '<h1>[^<]+</h1>')
 
-    # check if args are given
-    [ -z "$1" ] \
-        && fail "Missing required argument at position 1. Check out ${code}tp help init$none."
-    [ -z "$2" ] \
-        && fail "Missing required argument at position 2. Check out ${code}tp help init$none."
     title="$1"
     git_url="$2"
 
+    # check if args are given
+    if [[ -z "$title" ]]; then
+        echo "${red}Missing required argument \"title\" at position 1.$none Check out ${code}tp help init$none."
+        exit 1
+    fi
+    if [[ -z "$git_url" ]]; then
+        fail "${red}Missing required argument \"git_url\" at position 2.$none Check out ${code}tp help init$none."
+        exit 1
+    fi
+
     # clone the git repository
-    log "Cloning the git repository"
-    git clone "$git_url" "$title" || fail "Failed to clone the repository."
+    log "Cloning the repository"
+    git clone "$git_url" "$title" || die
 
     # go to directory
     cd "$title"
 
     # create dotnet solution
     log "Creating the dotnet solution"
-    dotnet new sln --name "$title" || fail "Failed to create dotnet solution."
+    dotnet new sln --name "$title" || die
     # create main project
     log "Creating the dotnet console project"
-    dotnet new console -n "$title" -f net7.0 -lang 'C#' || fail "Failed to create dotnet console project."
-    log "Adding the dotnet console project to the dotnet solution"
-    dotnet sln add "$title/$title.csproj" || fail "Failed to add the main C# project to the solution."
+    dotnet new console -n "$title" -f net7.0 -lang 'C#' || die
+    dotnet sln add "$title/$title.csproj" || die
     # create test project
     log "Creating the dotnet xunit project"
-    dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || fail "Failed to create the C# xunit test project."
-    log "Adding the dotnet xunit project to the dotnet solution"
-    dotnet sln add "Tests/Tests.csproj" || fail "Failed to add the test project to the solution."
-    log "Adding the reference from the xunit project to the console project"
-    dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj" || fail "Failed to add the reference from the test project to the main one."
+    dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || die
+    dotnet sln add "Tests/Tests.csproj" || die
+    dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj" || die
 
     # create utility files
-    log "Creating the .gitignore file"
-    echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore || fail "Failed to create the .gitignore file."
-    log "Creating the README"
-    echo "$title" > README || fail "Failed to create the README file."
+    log "Creating the .gitignore and README files"
+    echo "bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user" > .gitignore || die
+    echo "$title" > README || die
 
     # push on the remote
-    log "Adding changes to git"
-    git add -A || fail "Failed to git add all the changes."
-    log "Committing added changes"
-    git commit -m "First commit"  || fail "Failed to git commit."
-    log "Pushing the commit to the remote"
-    git push || fail "Failed to git push."
+    log "Synchronizing the git remote"
+    git add -A || die
+    git commit -m "First commit"  || die
+    git push || die
 
-    success "Successfully initialized the practical!"
+    success
 
 }
 
@@ -235,27 +246,27 @@ init_cmd() {
 save_cmd() {
 
     # testing if there are changes to commit
-    [ $(git status --porcelain | wc -l) -eq "0" ] \
-        && fail "Nothing to push! The save has been canceled."
+    if [[ $(git status --porcelain | wc -l) -eq "0" ]]; then
+        echo -e "${red}Nothing to push, the git working tree is clean. The save has been canceled.$none"
+        exit 3
+    fi
 
     # choosing a commit name
-    if [ -n "$1" ]; then
-        log "Setting commit name to the given argument"
+    if [[ -n "$1" ]]; then
         commit="$1"
     else
-        log "Generating a commit name"
         commit="Commit-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
     fi
 
     # use git
-    log "Adding changes to git"
-    git add -A
-    log "Committing added changes"
-    git commit -m "$commit"
-    log "Pushing the commit to the remote"
-    git push
+    log "Committing changes"
+    git add -A || die
+    git commit -m "$commit" || die
+    log "Synchronizing the git remote"
+    git push || die
 
-    success "Successfully save the work on the remote!"
+    success
+
 }
 
 
@@ -263,38 +274,32 @@ save_cmd() {
 archi_cmd() {
 
     # choose the names of the commit and the tag depending on the given parameters
-    if [ -n "$1" ]; then
-        log "Setting commit name to the given argument"
+    if [[ -n "$1" ]]; then
         commit="$1"
-        if [ -n "$2" ]; then
-            log "Setting tag name to the given argument"
+        if [[ -n "$2" ]]; then
             tag="$2"
         else
-            log "Setting tag name to the commit name by default (none has been given)"
             tag="$1"
         fi
     else
-        log "Generating a commit name"
         commit="$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1)"
-        log "Generating a tag name"
         tag="$commit"
     fi
 
     # git add & commit
-    if [ $(git status --porcelain | wc -l) -ne "0" ]; then
-        log "Adding changes to git"
-        git add -A
-        log "Committing added changes"
-        git commit -m "$commit"
+    if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
+        log "Committing changes"
+        git add -A || die
+        git commit -m "$commit" || die
     fi
     
     # git tag & push
     log "Creating the tag"
-    git tag -ma "archi-$tag"
-    log "Pushing the commit and the tag to the remote"
-    git push --follow-tags
+    git tag -ma "archi-$tag" || die
+    log "Synchronizing the git remote"
+    git push --follow-tags || die
 
-    success "Successfully pushed an archi tag!"
+    success
 
 }
 
@@ -303,45 +308,39 @@ archi_cmd() {
 submit_cmd() {
 
     # ask for user confirmation
-    log "Generating a number for user confirmation"
-    num=$(shuf -i 100000-999999 -n 1)
-    log "Prompting"
-    printf "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit.\n"
-    log "Waiting for user input"
+    num=$(shuf -i 100000-999999 -n 1) 
+    echo -e "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit."
     read -p "> " input
-    [ input -ne "$num" ] && printf "${bold}Command canceled!$none\n" && exit
+    if [[ input -ne "$num" ]]; then
+        echo -e "${bold}Command canceled!$none\n"
+        exit 4
+    fi
 
     # choose the names of the commit and the tag depending on the given parameters
-    if [ -n "$1" ]; then
-        log "Setting commit name to the given argument"
+    if [[ -n "$1" ]]; then
         commit="$1"
-        if [ -n "$2" ]; then
-            log "Setting tag name to the given argument"
+        if [[ -n "$2" ]]; then
             tag="$2"
         else
-            log "Setting tag name to the commit name by default (none has been given)"
             tag="$1"
         fi
     else
-        log "Generating a commit name"
         commit="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
-        log "Generating a tag name"
         tag="$commit"
     fi
 
     # git add & commit
-    if [ $(git status --porcelain | wc -l) -ne "0" ]; then
-        log "Adding changes to git"
-        git add -A
-        log "Committing added changes"
-        git commit -m "$commit"
+    if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
+        log "Committing changes..."
+        git add -A || die
+        git commit -m "$commit" || die
     fi
     
     # git tag & push
     log "Creating the tag"
-    git tag -ma "submit-$tag"
-    log "Pushing the commit and the tag to the remote"
-    git push --follow-tags
+    git tag -ma "submit-$tag" || die
+    log "Synchronizing the git remote"
+    git push --follow-tags || die
 
     success "Successfully pushed an submit tag!"
 }
@@ -350,8 +349,7 @@ submit_cmd() {
 # Show git log
 log_cmd() {
 
-    log "Running git log"
-    git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- || fail "Failed to run git log"
+    git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- || die
 
 }
 
@@ -361,31 +359,31 @@ show_help() {
 
     case "$1" in
         "init")
-            printf "$init_doc"
+            echo -e "$init_doc"
             exit
             ;;
         "save")
-            printf "$save_doc"
+            echo -e "$save_doc"
             exit
             ;;
         "archi")
-            printf "$archi_doc"
+            echo -e "$archi_doc"
             exit
             ;;
         "submit")
-            printf "$submit_doc"
+            echo -e "$submit_doc"
             exit
             ;;
         "log"|"lg")
-            printf "$log_doc"
+            echo -e "$log_doc"
             exit
             ;;
         ""|"help")
-            printf "$help_doc"
+            echo -e "$help_doc"
             exit
             ;;
         *)
-            printf "\n${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help.\n\n"
+            echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
             exit 1
             ;;
     esac
@@ -420,7 +418,7 @@ case "$1" in
         exit
         ;;
     *)
-        printf "\n${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help.\n\n"
+        echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
         exit 1
         ;;
 esac
