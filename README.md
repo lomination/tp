@@ -23,7 +23,7 @@ If you encounter any problem, feel free to open a github issue or to contact me 
 To install this tool on your computer **of the PIE**, run the following installation script. No admin permissions are needed.
 
 ```sh
-curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/install.sh" | sh
+curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/install.sh" | bash
 ```
 
 ### Manual installation
