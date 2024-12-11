@@ -20,6 +20,6 @@ else
     install
 fi
 
-if ! [[ $(cat afs/.confs/bashrc) == *'PATH=$PATH:$(pwd)/.bin'* ]]; then
-    echo 'PATH=$PATH:$(pwd)/.bin' >> afs/.confs/bashrc
+if ! [[ $(cat .bashrc) == *"PATH=$$PATH:$(pwd)/.bin"* ]]; then
+    echo -e "\nPATH=$$PATH:$(pwd)/.bin\n" >> .bashrc
 fi
