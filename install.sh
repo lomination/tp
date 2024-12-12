@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 
-install() {
-    cd "afs/.bin/"
-    curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > tp
-    chmod +x tp
-    echo -e "\033[32mInstallation succeeded!\033[32m Make sure to restart you shell before trying."
-}
-
 cd
-if [[ -e "afs/.bin" ]]; then
-    if [[ -d "afs/.bin" ]]; then
-        install
-    else
-        echo -e "\033[31mERROR\033[0m: $(pwd)/.bin already exists but is not a directory. Consider removing the file, using the manual installation or asking for help to @lomination on Discord."
-        exit 1
-    fi
-else
+
+if ! [[ -e "afs/.bin" ]]; then
     mkdir "afs/.bin"
-    install
 fi
 
-if ! [[ $(cat .bashrc) == *"PATH=$$PATH:$(pwd)/.bin"* ]]; then
-    echo -e "\nPATH=$$PATH:$(pwd)/.bin\n" >> .bashrc
+if ! [[ -d "afs/.bin" ]]; then
+    echo -e "\033[31mERROR\033[0m: ~/afs/.bin already exists but is not a directory. Consider removing the file, using the manual installation or asking for help to @lomination on Discord."
+    exit 1
 fi
+
+curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > 'afs/.bin/tp'
+chmod +x 'afs/.bin/tp'
+
+if ! [[ $(cat .bashrc) == *"PATH=\$PATH:$(pwd)/.bin"* ]]; then
+    echo -e "\n# Add the tp command\nPATH=\$PATH:$(pwd)/.bin\n" >> .bashrc
+fi
+
+echo -e "\033[32mInstallation succeeded!\033[0m Make sure to restart you shell before trying."
