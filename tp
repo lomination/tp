@@ -144,6 +144,19 @@ ${title}(EXAMPLES)$none
 
     ${code}tp log$none
 "
+update_doc="
+${title}(DESCRIPTION)$none
+
+    ${information}Update$none this command if an update is available.
+
+${title}(USAGE)$none
+
+    Usage: ${code}tp update$none
+
+${title}(EXAMPLES)$none
+
+    ${code}tp update$none
+"
 help_doc="
 ${title}(DESCRIPTION)$none
 
@@ -354,6 +367,26 @@ log_cmd() {
 }
 
 
+# Update this script
+update_cmd() {
+
+    log "Finding the tp file"
+    tp_path="$(which 'tp')" || die
+    log "Curling the new version of github script"
+    new_version="$(curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp')" || die
+    log "Comparing remote version with local one"
+    if [[ $new_version == "$(cat $tp_path)" ]]; then
+        echo -e "The local version is already up-to-date!" >&3
+        success
+    else
+        log "Updating the scripts"
+        echo $new_version > $tp_path || die
+        success
+    fi
+
+}
+
+
 # Show a help message
 show_help() {
 
@@ -376,6 +409,10 @@ show_help() {
             ;;
         "log"|"lg")
             echo -e "$log_doc" >&3
+            exit
+            ;;
+        "update")
+            echo -e "$update_doc" >&3
             exit
             ;;
         ""|"help")
@@ -411,6 +448,10 @@ case "$1" in
         ;;
     "log"|"lg")
         log_cmd
+        exit
+        ;;
+    "update")
+        update_cmd
         exit
         ;;
     "help")
