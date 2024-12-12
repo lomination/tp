@@ -20,4 +20,4 @@ if ! [[ $(cat .bashrc) == *"PATH=\$PATH:$tp_path"* ]]; then
     echo -e "\n# Add the tp command\nPATH=\$PATH:$tp_path\n" >> .bashrc
 fi
 
-echo -e "\033[32mInstallation succeeded!\033[0m Make sure to restart you shell before trying."
+echo -e "\n\033[32mInstallation succeeded!\033[0m Make sure to restart you shell before trying."
