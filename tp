@@ -29,7 +29,7 @@ bright_blue='\033[94m'
 
 
 # Styles
-code="$italics$yellow"
+code="$italics$green"
 information="$underline"
 title="$bold$reverse"
 note="${bright_blue}NOTE: "
