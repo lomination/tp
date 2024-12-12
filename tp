@@ -193,7 +193,7 @@ log() {
 
 success() {
 
-    echo -e "$bold${green}Success!$none" >& 3
+    echo -e "\n$bold${green}Success!$none" >& 3
 
 }
 
