@@ -375,12 +375,12 @@ update_cmd() {
     log "Curling the new version of github script"
     new_version="$(curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp')" || die
     log "Comparing remote version with local one"
-    if [[ $new_version == "$(cat $tp_path)" ]]; then
+    if [[ "$new_version" == "$(cat $tp_path)" ]]; then
         echo -e "The local version is already up-to-date!" >&3
         success
     else
         log "Updating the scripts"
-        echo $new_version > $tp_path || die
+        echo "$new_version" > "$tp_path" || die
         success
     fi
 
