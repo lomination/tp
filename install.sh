@@ -14,8 +14,10 @@ fi
 curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > 'afs/.bin/tp'
 chmod +x 'afs/.bin/tp'
 
-if ! [[ $(cat .bashrc) == *"PATH=\$PATH:$(pwd)/.bin"* ]]; then
-    echo -e "\n# Add the tp command\nPATH=\$PATH:$(pwd)/.bin\n" >> .bashrc
+tp_path="$(pwd)/afs/.bin/"
+
+if ! [[ $(cat .bashrc) == *"PATH=\$PATH:$tp_path"* ]]; then
+    echo -e "\n# Add the tp command\nPATH=\$PATH:$tp_path\n" >> .bashrc
 fi
 
 echo -e "\033[32mInstallation succeeded!\033[0m Make sure to restart you shell before trying."
