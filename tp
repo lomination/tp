@@ -196,6 +196,10 @@ log() {
 	echo -e ">>> $msg"                  # echoing to logfile
 	echo -e "$decrease$msg...$none" >&3 # echoing to stdout
 }
+# Removes the logfile.
+clear_logfile() {
+	rm "$logfile"
+}
 # Shows a failure message and exit the execution with exit code 1.
 die() {
 	msg="$1"
@@ -209,7 +213,7 @@ die() {
 # Shows a failure message and exit the execution with exit code 0.
 success() {
 	msg="$1"
-	rm "$logfile"
+	clear_logfile
 	if [[ -z "$msg" ]]; then
 		echo -e "\n$bold${green}Success!$none" >& 3
 	else
@@ -376,6 +380,7 @@ submit_cmd() {
 
 # Shows git log.
 log_cmd() {
+	clear_logfile
 	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3 || die
 }
 
@@ -434,6 +439,7 @@ update_cmd() {
 
 # Shows a help message for the given command.
 show_help() {
+	clear_logfile
 	case "$1" in
 		"init")
 			echo -e "$init_doc" >&3
@@ -464,7 +470,7 @@ show_help() {
 			exit
 			;;
 		*)
-			echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help." >&3
+			echo -e "$blod${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help." >&3
 			exit 1
 			;;
 	esac
@@ -503,6 +509,7 @@ case "$1" in
 		exit
 		;;
 	*)
+		clear_logfile
 		echo -e "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help." >&3
 		exit 1
 		;;
