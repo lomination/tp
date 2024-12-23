@@ -177,7 +177,7 @@ ${title}(DESCRIPTION)$none
 
 ${title}(USAGE)$none
 
-	It takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none and ${code}help$none.
+	It takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none and ${code}help$none.
 
 	Usage: ${code}tp help <command>$none
 
