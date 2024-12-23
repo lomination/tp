@@ -155,6 +155,20 @@ ${title}(EXAMPLES)$none
 
 	${code}tp log$none
 "
+# Help message for the status command
+status_doc="
+${title}(DESCRIPTION)$none
+
+	${information}Displays the various changes$none of the current git repository. It is equivalent to the \"git status\".
+
+${title}(USAGE)$none
+
+	Usage: ${code}tp status$none
+
+${title}(EXAMPLES)$none
+
+	${code}tp status$none
+"
 # Help message for the update command
 update_doc="
 ${title}(DESCRIPTION)$none
@@ -381,7 +395,14 @@ submit_cmd() {
 # Shows git log.
 log_cmd() {
 	clear_logfile
-	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3 || die
+	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3
+}
+
+
+# Show git status.
+status_cmd() {
+	clear_logfile
+	git status -sb >& 3
 }
 
 
@@ -438,7 +459,7 @@ update_cmd() {
 
 
 # Shows a help message for the given command.
-show_help() {
+help_cmd() {
 	clear_logfile
 	case "$1" in
 		"init")
@@ -459,6 +480,10 @@ show_help() {
 			;;
 		"log"|"lg")
 			echo -e "$log_doc" >&3
+			exit
+			;;
+		"status"|"st")
+			echo -e "$status_doc" >&3
 			exit
 			;;
 		"update")
@@ -500,12 +525,16 @@ case "$1" in
 		log_cmd
 		exit
 		;;
+	"status"|"st")
+		status_cmd
+		exit
+		;;
 	"update")
 		update_cmd
 		exit
 		;;
 	"help")
-		show_help "$2"
+		help_cmd "$2"
 		exit
 		;;
 	*)

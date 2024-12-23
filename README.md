@@ -10,7 +10,7 @@ License: GPL3
 
 ## Usage
 
-Once properly installed, you can use this tool in your shell by typing `tp`. This script offers various commands: `init`, `save`, `archi`, `submit`, `log`, `update` and `help`. Check out `tp help` to learn more about how to use the commands.
+Once properly installed, you can use this tool in your shell by typing `tp`. This script offers various commands: `init`, `save`, `archi`, `submit`, `log`, `status`, `update` and `help`. Check out `tp help` to learn more about how to use the commands.
 
 ## Installation
 
