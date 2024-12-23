@@ -263,7 +263,7 @@ init_cmd() {
 	dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || die
 	dotnet sln add "Tests/Tests.csproj" || die
 	dotnet add "Tests/Tests.csproj" reference "$title/$title.csproj" || die
-	echo "global using $title;" >> 'Tests/GlobalUsings.cs' || die
+	echo -e "\nglobal using $title;" >> 'Tests/GlobalUsings.cs' || die
 
 	# create utility files
 	log "Creating the .gitignore and README files"
