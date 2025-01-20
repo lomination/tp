@@ -134,9 +134,9 @@ success() {
 	msg="$1"
 	del_logfile
 	if [[ -z "$msg" ]]; then
-		myecho "\n$bold${green}Success!$none"
+		myecho "$bold${green}Success!$none"
 	else
-		myecho "\n$bold${green}Success:$none $msg"
+		myecho "$bold${green}Success:$none $msg"
 	fi
 	exit 0
 
