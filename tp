@@ -66,13 +66,13 @@ conf_contains() {
 	# The default value of the searched key
 	default="$2"
 	if [[ "$conf_is_valid" == 'false' ]]; then
-		return "$default"
+		echo "$default"
 	elif [[ "$(cat "$conf_path")" == *"${pattern}=true"* ]]; then
-		return 'true'
+		echo 'true'
 	elif [[ "$(cat "$conf_path")" == *"${pattern}=false"* ]]; then
-		return 'false'
+		echo 'false'
 	else
-		return "$default"
+		echo "$default"
 	fi
 
 }
