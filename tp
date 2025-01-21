@@ -90,7 +90,7 @@ conf_list_added_changes="$(conf_contains 'list_added_changes' 'false')"
 myecho() {
 
 	msg="$1"
-	echo -e $msg >&3 # TODO
+	echo -e "$msg" >&3 # TODO
 
 }
 
@@ -186,17 +186,17 @@ init_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-					The ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
+				\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
 
 				${title}(USAGE)$none
 
-					It takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
+				\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
 
-					Usage: ${code}tp init <title> <git_url>${none}
+				\tUsage: ${code}tp init <title> <git_url>${none}
 
 				${title}(EXAMPLES)$none
 
-					${code}tp init \"GaulishMall\" \"firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\"$none
+				\t${code}tp init \"GaulishMall\" \"firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\"$none
 			END
 		)
 		myecho "$msg"
@@ -266,22 +266,22 @@ save_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-					This command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
+				\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
 
-					${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+				\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
 
 				${title}(USAGE)$none
 
-					It takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
+				\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
 
-					Usages:
-					- ${code}tp save <commit_name>${none}
-					- ${code}tp save${none}
+				\tUsages:
+				\t- ${code}tp save <commit_name>${none}
+				\t- ${code}tp save${none}
 
 				${title}(EXAMPLES)$none
-					
-					${code}tp save \"Fix NegaFibonacci encoding algorithm\"$none
-					${code}tp save$none
+				\t
+				\t${code}tp save \"Fix NegaFibonacci encoding algorithm\"$none
+				\t${code}tp save$none
 			END
 		)
 		myecho "$msg"
@@ -325,31 +325,31 @@ archi_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-					The ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
-					
-					${note}If any changes have been made, then it commits all of them before creating the tag.$none
+				\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
+				\t
+				\t${note}If any changes have been made, then it commits all of them before creating the tag.$none
 
-					${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+				\t${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
 
 				${title}(USAGE)$none
 
-					It takes as parameters the ${information}name of the tag$none and the ${information}name of the commit$none that may not be used if no changes has been made.
+				\tIt takes as parameters the ${information}name of the tag$none and the ${information}name of the commit$none that may not be used if no changes has been made.
 
-					${note}The name of the archi tag should not contain the prefix \"archi-\" since it is automatically added.$none
+				\t${note}The name of the archi tag should not contain the prefix \"archi-\" since it is automatically added.$none
 
-					When no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
+				\tWhen no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
 
-					Usages:
-					- ${code}tp archi <tag_name> <commit_name>$none
-					- ${code}tp archi <tag_name>$none
-					- ${code}tp archi$none
+				\tUsages:
+				\t- ${code}tp archi <tag_name> <commit_name>$none
+				\t- ${code}tp archi <tag_name>$none
+				\t- ${code}tp archi$none
 
 				${title}(EXAMPLES)$none
 
-					${code}tp archi \"first\" \"Finish the proficiencies\"$none
-					${code}tp archi \"second\" \"Remove unauthorized classes\"$none
-					${code}tp archi \"third\"$none
-					${code}tp archi$none
+				\t${code}tp archi \"first\" \"Finish the proficiencies\"$none
+				\t${code}tp archi \"second\" \"Remove unauthorized classes\"$none
+				\t${code}tp archi \"third\"$none
+				\t${code}tp archi$none
 			END
 		)
 		myecho "$msg"
@@ -401,32 +401,32 @@ submit_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-					The ${code}tp archi$none submits an ${information}submit tag$none to the mouli.
-					
-					${note}If any changes have been made, then it commits all of them before creating the tag.$none
+				\tThe ${code}tp archi$none submits an ${information}submit tag$none to the mouli.
+				\t
+				\t${note}If any changes have been made, then it commits all of them before creating the tag.$none
 
-					${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+				\t${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
 
-					${warn}Make sure you are ready to push a submit tag before using this command! You sould have already pushed an archi tag that succeeded and you should not have done modification between the archi and the submit tag.$none
+				\t${warn}Make sure you are ready to push a submit tag before using this command! You sould have already pushed an archi tag that succeeded and you should not have done modification between the archi and the submit tag.$none
 
 				${title}(USAGE)$none
 
-					It takes as parameters the ${information}name of the commit$none and the ${information}name of the submit tag$none.
-					
-					${note}The name of the submit tag should not contain the prefix \"submit-\" since it is automatically added.$none
+				\tIt takes as parameters the ${information}name of the commit$none and the ${information}name of the submit tag$none.
+				\t
+				\t${note}The name of the submit tag should not contain the prefix \"submit-\" since it is automatically added.$none
 
-					When no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
+				\tWhen no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
 
-					Usages:
-					- ${code}tp submit <tag_name> <commit_name>$none
-					- ${code}tp submit <tag_name>$none
-					- ${code}tp submit$none
+				\tUsages:
+				\t- ${code}tp submit <tag_name> <commit_name>$none
+				\t- ${code}tp submit <tag_name>$none
+				\t- ${code}tp submit$none
 
 				${title}(EXAMPLES)$none
 
-					${code}tp submit \"adamsromance\" \"Finish the proficiencies\"$none
-					${code}tp submit \"first\" \"VipOk\"$none
-					${code}tp submit$none
+				\t${code}tp submit \"adamsromance\" \"Finish the proficiencies\"$none
+				\t${code}tp submit \"first\" \"VipOk\"$none
+				\t${code}tp submit$none
 			END
 		)
 		myecho "$msg"
@@ -488,15 +488,15 @@ update_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-					${information}Update$none this command if an update is available.
+				\t${information}Update$none this command if an update is available.
 
 				${title}(USAGE)$none
 
-					Usage: ${code}tp update$none
+				\tUsage: ${code}tp update$none
 
 				${title}(EXAMPLES)$none
 
-					${code}tp update$none
+				\t${code}tp update$none
 			END
 		)
 		myecho "$msg"
@@ -585,18 +585,18 @@ help_cmd() {
 				cat <<-END
 					${title}(DESCRIPTION)$none
 
-						${information}Display the documentation$none associated with a given command.
+					\t${information}Display the documentation$none associated with a given command.
 
 					${title}(USAGE)$none
 
-						It takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none and ${code}help$none.
+					\tIt takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none and ${code}help$none.
 
-						Usage: ${code}tp help <command>$none
+					\tUsage: ${code}tp help <command>$none
 
 					${title}(EXAMPLES)$none
 
-						${code}tp help init$none
-						${code}tp help help$none
+					\t${code}tp help init$none
+					\t${code}tp help help$none
 				END
 			)
 			myecho "$msg"
