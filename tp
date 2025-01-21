@@ -521,6 +521,7 @@ update_cmd() {
 		log "Creating the update script"
 		# The path to the update script
 		update_script_path="$(mktemp '/tmp/tp-version-XXXXXXXXXXXXXXXXXXXX')"
+		# Write out the update script
 		cat > "$update_script_path" <<-EOF
 		#!/usr/bin/env bash
 
@@ -534,6 +535,7 @@ update_cmd() {
 		}
 
 		rm '$update_script_path'
+		chmod +x '$tp_path' || die 'Failed to make the new script executable'
 		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
 
 		rm '$logfile'
@@ -541,7 +543,9 @@ update_cmd() {
 		exit 0
 		EOF
 		log "Executing the update script"
+		# Make the script executable
 		chmod +x "$update_script_path" || die 'Could not make the update script executable'
+		# Run the script
 		exec "$update_script_path" || die 'Could not exectute the update script'
 	fi
 
