@@ -173,6 +173,15 @@ pull_alias() {
 
 }
 
+# Prints the path of the config
+config_alias() {
+
+	del_logfile
+	myecho "Path to the configuration: $conf_path (validity: $conf_is_valid)\n${note}the config has to follow the format ${code}<key>=<value>$none"
+	exit 0
+
+}
+
 
 ### Commands ###
 
@@ -623,6 +632,9 @@ case "$1" in
 		;;
 	"pull"|"sync")
 		pull_alias
+		;;
+	"cfg"|"conf"|"config"|"configuration")
+		config_alias
 		;;
 	# Commands
 	"init")
