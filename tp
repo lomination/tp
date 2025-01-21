@@ -634,10 +634,10 @@ case "$1" in
 		submit_cmd "$2" "$3"
 		;;
 	"update")
-		update_cmd
+		update_cmd "$2"
 		;;
 	"help")
-		help_cmd "$1"
+		help_cmd "$2"
 		;;
 	*)
 		del_logfile
