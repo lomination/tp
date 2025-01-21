@@ -534,10 +534,10 @@ update_cmd() {
 		}
 
 		rm '$update_script_path'
-		mv '$new_version_path' '$tp_path' || die "Failed to move the new version.'
+		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
 
-		rm "$logfile"
-		echo -e "\n$bold${green}Successfully updated!" >& 3
+		rm '$logfile'
+		echo -e '\n$bold${green}Successfully updated!' >& 3
 		exit 0
 		EOF
 		log "Executing the update script"
