@@ -247,6 +247,7 @@ init_cmd() {
 	log "Creating the dotnet xunit project"
 	dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || die
 	dotnet sln add "Tests/Tests.csproj" || die
+	rm 'Tests/UnitTest1.cs'
 	dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die
 	echo -e "\nglobal using $title;" >> 'Tests/GlobalUsings.cs' || die
 
