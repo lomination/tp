@@ -446,11 +446,14 @@ submit_cmd() {
 
 	# The number the user must enter
 	num="$(shuf -i 100000-999999 -n 1)"
-	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $num. Press enter with an invalid input to exit."
+	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $underline$num$none. Press enter with an invalid input to exit."
 	read -p "> " input
 	if [[ "$input" -ne "$num" ]]; then
-		success "${bold}Command canceled!$none"
+		del_logfile
+		myecho "Invalid code. Command canceled!"
+		exit 0
 	fi
+	myecho "Valid input"
 
 	# Choose a commit and tag name
 	if [[ -n "$1" ]]; then
