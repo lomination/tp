@@ -259,6 +259,36 @@ config_alias() {
 }
 
 
+# Prints the path of the config
+test_alias() {
+
+	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-END
+				${title}(DESCRIPTION)$none
+
+				\tThis command runs the tests of the current dotnet solution.
+
+				${title}(EXAMPLE)$none
+
+				\t${code}tp test$none
+			END
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
+	dotnet test --nologo -v q
+	dotnet clean &> /dev/null
+	exit 0
+
+}
+
+
 ### Commands ###
 
 # Creates the practical environment.
