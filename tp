@@ -311,7 +311,7 @@ init_cmd() {
 
 				${title}(EXAMPLES)$none
 
-				\t${code}tp init \"GaulishMall\" \"firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git\"$none
+				\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
 			END
 		)
 		myecho "$msg"
@@ -396,7 +396,7 @@ save_cmd() {
 
 				${title}(EXAMPLES)$none
 				\t
-				\t${code}tp save \"Fix NegaFibonacci encoding algorithm\"$none
+				\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
 				\t${code}tp save$none
 			END
 		)
@@ -457,8 +457,8 @@ archi_cmd() {
 
 				${title}(EXAMPLES)$none
 
-				\t${code}tp archi \"first\"$none
-				\t${code}tp archi \"0\"$none
+				\t${code}tp archi "first"$none
+				\t${code}tp archi "0"$none
 				\t${code}tp archi$none
 			END
 		)
@@ -501,9 +501,9 @@ submit_cmd() {
 			cat <<-END
 				${title}(DESCRIPTION)$none
 
-				\tThe ${code}tp archi$none submits an ${information}submit tag$none to the mouli.
+				\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
 
-				\t${warn}Make sure you have already submitted a archi tag and that it has a valid output before running this command.$none
+				\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.$none
 
 				${title}(USAGE)$none
 
@@ -517,8 +517,8 @@ submit_cmd() {
 
 				${title}(EXAMPLES)$none
 
-				\t${code}tp submit \"adamsromance\"$none
-				\t${code}tp submit \"first-try\"$none
+				\t${code}tp submit "adamsromance"$none
+				\t${code}tp submit "first-try"$none
 				\t${code}tp submit$none
 			END
 		)
