@@ -149,6 +149,25 @@ success() {
 log_alias() {
 
 	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-END
+				${title}(DESCRIPTION)$none
+
+				\tThis command is an alias of the ${code}git log$none command.
+
+				${title}(EXAMPLE)$none
+
+				\t${code}tp log$none
+			END
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
 	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3
 	exit 0
 
@@ -159,6 +178,25 @@ log_alias() {
 status_alias() {
 
 	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-END
+				${title}(DESCRIPTION)$none
+
+				\tThis command is an alias of the ${code}git status$none command.
+
+				${title}(EXAMPLE)$none
+
+				\t${code}tp status$none
+			END
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
 	git status -sb >& 3
 	exit 0
 
@@ -168,6 +206,25 @@ status_alias() {
 pull_alias() {
 
 	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-END
+				${title}(DESCRIPTION)$none
+
+				\tThis command is an alias of the ${code}git pull$none command.
+
+				${title}(EXAMPLE)$none
+
+				\t${code}tp pull$none
+			END
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
 	git pull
 	success 'repository successfully pulled!'
 
@@ -177,6 +234,25 @@ pull_alias() {
 config_alias() {
 
 	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-END
+				${title}(DESCRIPTION)$none
+
+				\tThis command prints the path to the config in the standard output.
+
+				${title}(EXAMPLE)$none
+
+				\t${code}tp status$none
+			END
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
 	myecho "Path to the configuration: $conf_path (validity: $conf_is_valid)\n${note}the config has to follow the format ${code}<key>=<value>$none"
 	exit 0
 
@@ -219,7 +295,7 @@ init_cmd() {
 	git_url="$2"
 
 	# Check if the given arguments are valid
-	log "Checking arguments"
+	log 'Checking arguments'
 	if [[ -z "$title" ]]; then
 		die "Missing required argument 'title' at position 1. Check out ${code}tp help init$none."
 	fi
@@ -228,38 +304,38 @@ init_cmd() {
 	fi
 
 	# Clone the git repository
-	log "Cloning the repository"
+	log 'Cloning the repository'
 	git clone "$git_url" "$title" || die
 
 	# Go to the cloned repository
 	cd "$title"
 
 	# Create dotnet solution
-	log "Creating the dotnet solution"
+	log 'Creating the dotnet solution'
 	dotnet new sln --name "$title" || die
 
 	# Create main project
-	log "Creating the dotnet console project"
+	log 'Creating the dotnet console project'
 	dotnet new console -n "$title" -f net7.0 -lang 'C#' || die
 	dotnet sln add "$title/$title.csproj" || die
 
 	# Create test project
-	log "Creating the dotnet xunit project"
-	dotnet new xunit -n "Tests" -f net7.0 -lang 'C#' || die
-	dotnet sln add "Tests/Tests.csproj" || die
+	log 'Creating the dotnet xunit project'
+	dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die
+	dotnet sln add 'Tests/Tests.csproj' || die
 	rm 'Tests/UnitTest1.cs'
 	dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die
 	echo -e "\nglobal using $title;" >> 'Tests/GlobalUsings.cs' || die
 
 	# Create the .gitignore and README files
-	log "Creating the .gitignore and README files"
+	log 'Creating the .gitignore and README files'
 	echo -e 'bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user\n.vscode' > .gitignore || die
 	echo "$title" > README || die
 
 	# Push the changes on the remote
-	log "Synchronizing the git remote"
+	log 'Synchronizing the git remote'
 	git add -A || die
-	git commit -m "First commit"  || die
+	git commit -m 'First commit'  || die
 	git push || die
 
 	success
@@ -300,24 +376,24 @@ save_cmd() {
 
 	# Testing if there are changes to commit
 	if [[ $(git status --porcelain | wc -l) == '0' ]]; then
-		success "Nothing to commit, the git working tree is clean."
+		success 'Nothing to commit, the git working tree is clean.'
 	fi
 
 	# Choosing a commit name
 	if [[ -n "$1" ]]; then
 		commit="$1"
 	else
-		commit="Commit-$(shuf -i 10000000-99999999 -n 1)"
+		commit="Commit-$(openssl rand -hex 4)"
 	fi
 
 	# Commit the changes
-	log "Committing changes"
+	log 'Committing changes'
 	git add -A || die
 	[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
 	git commit -m "$commit" || die
 
 	# Push the commit
-	log "Synchronizing the git remote"
+	log 'Synchronizing the git remote'
 	git push || die
 
 	success
@@ -336,29 +412,23 @@ archi_cmd() {
 				${title}(DESCRIPTION)$none
 
 				\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
-				\t
-				\t${note}If any changes have been made, then it commits all of them before creating the tag.$none
 
-				\t${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+				\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.$none
 
 				${title}(USAGE)$none
 
-				\tIt takes as parameters the ${information}name of the tag$none and the ${information}name of the commit$none that may not be used if no changes has been made.
+				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\t${note}The name of the archi tag should not contain the prefix \"archi-\" since it is automatically added.$none
-
-				\tWhen no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
+				\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.$none
 
 				\tUsages:
-				\t- ${code}tp archi <tag_name> <commit_name>$none
 				\t- ${code}tp archi <tag_name>$none
 				\t- ${code}tp archi$none
 
 				${title}(EXAMPLES)$none
 
-				\t${code}tp archi \"first\" \"Finish the proficiencies\"$none
-				\t${code}tp archi \"second\" \"Remove unauthorized classes\"$none
-				\t${code}tp archi \"third\"$none
+				\t${code}tp archi \"first\"$none
+				\t${code}tp archi \"0\"$none
 				\t${code}tp archi$none
 			END
 		)
@@ -366,34 +436,24 @@ archi_cmd() {
 		exit 0
 	fi
 
+	if [[ $(git status --porcelain | wc -l) -ne '0' ]]; then
+		del_logfile
+		die "there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+	fi
+
 	# Choose a commit and tag name
 	if [[ -n "$1" ]]; then
 		commit="$1"
-		if [[ -n "$2" ]]; then
-			tag="$2"
-		else
-			tag="$1"
-		fi
 	else
-		commit="$(shuf -i 10000000-99999999 -n 1)"
-		tag="$commit"
-	fi
-
-	# Commit the changes
-	if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
-		# Commit the changes
-		log "Committing changes"
-		git add -A || die
-		[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
-		git commit -m "$commit" || die
+		commit="$(openssl rand -hex 4)"
 	fi
 	
 	# Create a tag
-	log "Creating the tag"
+	log 'Creating the tag'
 	git tag -ma "archi-$tag" || die
 
 	# Push the tag and the commit
-	log "Synchronizing the git remote"
+	log 'Synchronizing the git remote'
 	git push --follow-tags || die
 
 	success
@@ -412,30 +472,23 @@ submit_cmd() {
 				${title}(DESCRIPTION)$none
 
 				\tThe ${code}tp archi$none submits an ${information}submit tag$none to the mouli.
-				\t
-				\t${note}If any changes have been made, then it commits all of them before creating the tag.$none
 
-				\t${warn}If any changes have been made, it adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
-
-				\t${warn}Make sure you are ready to push a submit tag before using this command! You sould have already pushed an archi tag that succeeded and you should not have done modification between the archi and the submit tag.$none
+				\t${warn}Make sure you have already submitted a archi tag and that it has a valid output before running this command.$none
 
 				${title}(USAGE)$none
 
-				\tIt takes as parameters the ${information}name of the commit$none and the ${information}name of the submit tag$none.
-				\t
-				\t${note}The name of the submit tag should not contain the prefix \"submit-\" since it is automatically added.$none
+				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\tWhen no commit name is given but that it is required, it is set ${information}by default to the tag's name$none. When both commit's and tag's names are not given, a ${information}random name$none is generated and used for both of them.
+				\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.$none
 
 				\tUsages:
-				\t- ${code}tp submit <tag_name> <commit_name>$none
 				\t- ${code}tp submit <tag_name>$none
 				\t- ${code}tp submit$none
 
 				${title}(EXAMPLES)$none
 
-				\t${code}tp submit \"adamsromance\" \"Finish the proficiencies\"$none
-				\t${code}tp submit \"first\" \"VipOk\"$none
+				\t${code}tp submit \"adamsromance\"$none
+				\t${code}tp submit \"first-try\"$none
 				\t${code}tp submit$none
 			END
 		)
@@ -443,47 +496,36 @@ submit_cmd() {
 		exit 0
 	fi
 
+	if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
+		die "there are uncommited changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+	fi
+
 	# Ask for user confirmation
 
 	# The number the user must enter
 	num="$(shuf -i 100000-999999 -n 1)"
 	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $underline$num$none. Press enter with an invalid input to exit."
-	read -p "> " input
+	read -p '> ' input
 	if [[ "$input" -ne "$num" ]]; then
 		del_logfile
-		myecho "Invalid code. Command canceled!"
+		myecho 'Invalid code. Command canceled!'
 		exit 0
 	fi
-	myecho "Valid input"
+	myecho 'Valid input'
 
-	# Choose a commit and tag name
+	# Choose a tag name
 	if [[ -n "$1" ]]; then
 		commit="$1"
-		if [[ -n "$2" ]]; then
-			tag="$2"
-		else
-			tag="$1"
-		fi
 	else
-		commit="$(shuf -i 10000000-99999999 -n 1)"
-		tag="$commit"
-	fi
-
-	# Commit the changes
-	if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
-		# Commit the changes
-		log "Committing changes"
-		git add -A || die
-		[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
-		git commit -m "$commit" || die
+		commit="$(openssl rand -hex 4)"
 	fi
 	
 	# Create a tag
-	log "Creating the tag"
+	log 'Creating the tag'
 	git tag -ma "submit-$tag" || die
 
 	# Push the tag and the commit
-	log "Synchronizing the git remote"
+	log 'Synchronizing the git remote'
 	git push --follow-tags || die
 
 	success
@@ -517,21 +559,21 @@ update_cmd() {
 	fi
 
 	# Find the paht to this script
-	log "Finding the tp file"
+	log 'Finding the tp file'
 	tp_path="$(which 'tp')" || die 'Could not locate the tp script.'
 
 	# Get the newest version
-	log "Downloading the newest version from the remote"
+	log 'Downloading the newest version from the remote'
 	new_version_path=$(mktemp "/tmp/tp-version-XXXXXXXXXXXXXXXXXXXX") || die
 	curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp' > "$new_version_path" || die
 
 	# Determine if an upgrade is needed
-	log "Comparing remote version with local one"
+	log 'Comparing remote version with local one'
 	if cmp "$tp_path" "$new_version_path" ; then
-		success "The local version is already up-to-date!" >&3
+		success 'The local version is already up-to-date!' >&3
 	else
 		# Create the update script
-		log "Creating the update script"
+		log 'Creating the update script'
 		# The path to the update script
 		update_script_path="$(mktemp '/tmp/tp-version-XXXXXXXXXXXXXXXXXXXX')"
 		# Write out the update script
@@ -555,7 +597,7 @@ update_cmd() {
 		echo -e '\n$bold${green}Successfully updated!' >& 3
 		exit 0
 		EOF
-		log "Executing the update script"
+		log 'Executing the update script'
 		# Make the script executable
 		chmod +x "$update_script_path" || die 'Could not make the update script executable'
 		# Run the script
@@ -571,29 +613,29 @@ help_cmd() {
 	del_logfile
 	case "$1" in
 		# Aliases
-		"log"|"lg")
+		'log'|'lg')
 			log_alias '--help'
 			;;
-		"status"|"st")
+		'status'|'st')
 			status_alias '--help'
 			;;
 		# Commands
-		"init")
+		'init')
 			init_cmd '--help'
 			;;
-		"save")
+		'save')
 			save_cmd '--help'
 			;;
-		"archi")
+		'archi')
 			archi_cmd '--help'
 			;;
-		"submit")
+		'submit')
 			submit_cmd '--help'
 			;;
-		"update")
+		'update')
 			update_cmd '--help'
 			;;
-		""|"help"|"-h"|"--help")
+		''|'help'|'-h'|'--help')
 			msg=$(
 				cat <<-END
 					${title}(DESCRIPTION)$none
@@ -628,35 +670,35 @@ help_cmd() {
 
 case "$1" in
 	# Aliases
-	"log"|"lg")
-		log_alias
+	'log'|'lg')
+		log_alias "$2"
 		;;
-	"status"|"st")
-		status_alias
+	'status'|'st')
+		status_alias "$2"
 		;;
-	"pull"|"sync")
-		pull_alias
+	'pull'|'sync')
+		pull_alias "$2"
 		;;
-	"cfg"|"conf"|"config"|"configuration")
-		config_alias
+	'cfg'|'conf'|'config'|'configuration')
+		config_alias "$2"
 		;;
 	# Commands
-	"init")
+	'init')
 		init_cmd "$2" "$3"
 		;;
-	"save")
+	'save')
 		save_cmd "$2"
 		;;
-	"archi")
+	'archi')
 		archi_cmd "$2" "$3"
 		;;
-	"submit")
+	'submit')
 		submit_cmd "$2" "$3"
 		;;
-	"update")
+	'update')
 		update_cmd "$2"
 		;;
-	"help")
+	'help')
 		help_cmd "$2"
 		;;
 	*)
