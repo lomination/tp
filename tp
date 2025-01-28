@@ -29,8 +29,8 @@ bright_blue='\033[94m'
 code="$italics$green"
 information="$underline"
 title="$bold$reverse"
-note="${bright_blue}NOTE: "
-warn="${bright_yellow}WARNING: "
+note="${bright_blue}NOTE:$none "
+warn="${bright_yellow}WARNING:$none "
 
 
 ### Outputs management ###
@@ -384,7 +384,7 @@ save_cmd() {
 
 				\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
 
-				\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!$none
+				\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
 
 				${title}(USAGE)$none
 
@@ -443,13 +443,13 @@ archi_cmd() {
 
 				\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
 
-				\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.$none
+				\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
 
 				${title}(USAGE)$none
 
 				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.$none
+				\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
 
 				\tUsages:
 				\t- ${code}tp archi <tag_name>$none
@@ -504,13 +504,13 @@ submit_cmd() {
 
 				\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
 
-				\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.$none
+				\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
 
 				${title}(USAGE)$none
 
 				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.$none
+				\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
 
 				\tUsages:
 				\t- ${code}tp submit <tag_name>$none
