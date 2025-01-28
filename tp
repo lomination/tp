@@ -468,7 +468,8 @@ archi_cmd() {
 
 	if [[ $(git status --porcelain | wc -l) -ne '0' ]]; then
 		del_logfile
-		die "there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+		myecho "${red}Error:$none there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+		exit 0
 	fi
 
 	# Choose a commit and tag name
@@ -526,8 +527,10 @@ submit_cmd() {
 		exit 0
 	fi
 
-	if [[ $(git status --porcelain | wc -l) -ne "0" ]]; then
-		die "there are uncommited changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+	if [[ $(git status --porcelain | wc -l) -ne '0' ]]; then
+		del_logfile
+		myecho "${red}Error:$none there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+		exit 0
 	fi
 
 	# Ask for user confirmation
