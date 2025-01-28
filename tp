@@ -168,7 +168,7 @@ log_alias() {
 		exit 0
 	fi
 
-	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >& 3
+	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >&3
 	exit 0
 
 }
@@ -197,7 +197,7 @@ status_alias() {
 		exit 0
 	fi
 
-	git status -sb >& 3
+	git status -sb >&3
 	exit 0
 
 }
@@ -624,7 +624,7 @@ update_cmd() {
 		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
 
 		rm '$logfile'
-		echo -e '\n$bold${green}Successfully updated!' >& 3
+		echo -e '\n$bold${green}Successfully updated!' >&3
 		exit 0
 		EOF
 		log 'Executing the update script'
