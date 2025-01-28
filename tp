@@ -674,14 +674,17 @@ help_cmd() {
 
 					${title}(USAGE)$none
 
-					\tIt takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none and ${code}help$none.
+					\tIt takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
 
 					\tUsage: ${code}tp help <command>$none
+					\tUsage: ${code}tp help$none
 
 					${title}(EXAMPLES)$none
 
 					\t${code}tp help init$none
-					\t${code}tp help help$none
+					\t${code}tp help submit$none
+					\t${code}tp help log$none
+					\t${code}tp help$none
 				END
 			)
 			myecho "$msg"

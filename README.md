@@ -10,11 +10,11 @@ License: GPL3
 
 ## Usage
 
-Once properly installed, you can use this tool in your shell by typing `tp`. This script offers various commands: `init`, `save`, `archi`, `submit`, `log`, `status`, `update` and `help`. Check out `tp help` to learn more about how to use the commands.
+Once properly installed, you can use this tool in your shell by typing `tp`. This script offers various commands: `init`, `save`, `archi`, `submit`, `update`, `log`, `status`, `pull`, `config`, `test`, and `help`. Check out `tp help` to learn more about how to use these commands.
 
 ## Installation
 
-This script has been made for Linux, especially the computers of the PIE. Therefore it is not supported on Windows.
+This script has been made for Linux, especially the computers of the PIE. Therefore it is not supported on Windows (as far as I know).
 
 If you encounter any problem, feel free to open a github issue or to contact me via Discord (@lomination).
 
@@ -33,13 +33,13 @@ To manually install the command, download the [tp file](https://github.com/lomin
 Then, you have to add the path to the `PATH` environment variable to be able to invoke tp as a command in your shell. To do so, open your bashrc file (often `~/.bashrc`) and add the following line (replacing `/path/to/directory/where/tp/is` by the path of the directory where you saved the tp file):
 
 ```sh
-PATH=$PATH:/path/to/directory/where/tp/is
+export PATH=$PATH:/path/to/directory/where/tp/is
 ```
 
 For instance, it could be:
 
 ```sh
-PATH=$PATH:/home/lomi/.bin
+export PATH=$PATH:/home/lomi/.bin
 ```
 
-Then end! Make sure to close and reopen your shell before testing.
+Then end! Make sure to **close and reopen** your shell before testing.
