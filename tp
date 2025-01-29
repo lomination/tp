@@ -623,8 +623,8 @@ update_cmd() {
 		}
 
 		rm '$update_script_path'
-		chmod +x '$tp_path' || die 'Failed to make the new script executable'
 		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
+		chmod +x '$tp_path' || die 'Failed to make the new script executable'
 
 		rm '$logfile'
 		echo -e '$bold${green}Successfully updated!' >&3
