@@ -718,6 +718,9 @@ case "$1" in
 	'cfg'|'conf'|'config'|'configuration')
 		config_alias "$2"
 		;;
+	'test')
+		test_alias "$2"
+		;;
 	# Commands
 	'init')
 		init_cmd "$2" "$3"
