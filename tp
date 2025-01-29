@@ -119,10 +119,10 @@ die() {
 
 	msg="$1"
 	if [[ -z "$msg" ]]; then
-		myecho "$blod${red}Fatal error!$none (logfile: $logfile)"
+		myecho "$bold${red}Fatal error!$none (logfile: $logfile)"
 	else
 		echo -e "Fatal error: $msg"
-		myecho "$blod${red}Fatal error:$none $msg (logfile: $logfile)"
+		myecho "$bold${red}Fatal error:$none $msg (logfile: $logfile)"
 	fi
 	exit 1
 
@@ -618,7 +618,7 @@ update_cmd() {
 
 		die() {
 			echo -e "Fatal error: \$1"
-			myecho "$blod${red}Fatal error:$none \$1 (logfile: $logfile)"
+			myecho "$bold${red}Fatal error:$none \$1 (logfile: $logfile)"
 			exit 1
 		}
 
@@ -694,7 +694,7 @@ help_cmd() {
 			exit 0
 			;;
 		*)
-			myecho "$blod${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
+			myecho "$bold${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
 			exit 1
 			;;
 	esac
@@ -742,7 +742,7 @@ case "$1" in
 		;;
 	*)
 		del_logfile
-		myecho "${red}ERROR:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
+		myecho "${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
 		exit 1
 		;;
 esac
