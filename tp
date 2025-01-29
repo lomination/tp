@@ -5,6 +5,9 @@
 # This code is under license GNU General Public License version 3.
 
 
+version=0.1.0
+
+
 ### Ansi escape codes ###
 
 none='\033[0m'
@@ -145,6 +148,35 @@ success() {
 
 ### Aliases ###
 
+# Displays the version of this script.
+version_alias() {
+
+	del_logfile
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command prints the current version of this script in the standard output.
+
+			${title}(EXAMPLE)$none
+
+			\t${code}tp version$none
+			EOF
+		)
+		myecho "$msg"
+		exit 0
+	fi
+
+	myecho "Version $version"
+	exit 0
+
+}
+
+
 # Shows git log.
 log_alias() {
 
@@ -154,15 +186,15 @@ log_alias() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command is an alias of the ${code}git log$none command.
+			\tThis command is an alias of the ${code}git log$none command.
 
-				${title}(EXAMPLE)$none
+			${title}(EXAMPLE)$none
 
-				\t${code}tp log$none
-			END
+			\t${code}tp log$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -183,15 +215,15 @@ status_alias() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command is an alias of the ${code}git status$none command.
+			\tThis command is an alias of the ${code}git status$none command.
 
-				${title}(EXAMPLE)$none
+			${title}(EXAMPLE)$none
 
-				\t${code}tp status$none
-			END
+			\t${code}tp status$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -211,15 +243,15 @@ pull_alias() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command is an alias of the ${code}git pull$none command.
+			\tThis command is an alias of the ${code}git pull$none command.
 
-				${title}(EXAMPLE)$none
+			${title}(EXAMPLE)$none
 
-				\t${code}tp pull$none
-			END
+			\t${code}tp pull$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -239,15 +271,15 @@ config_alias() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command prints the path to the config in the standard output.
+			\tThis command prints the path to the config in the standard output.
 
-				${title}(EXAMPLE)$none
+			${title}(EXAMPLE)$none
 
-				\t${code}tp status$none
-			END
+			\t${code}tp status$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -268,15 +300,15 @@ test_alias() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command runs the tests of the current dotnet solution.
+			\tThis command runs the tests of the current dotnet solution.
 
-				${title}(EXAMPLE)$none
+			${title}(EXAMPLE)$none
 
-				\t${code}tp test$none
-			END
+			\t${code}tp test$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -298,21 +330,21 @@ init_cmd() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
+			\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
 
-				${title}(USAGE)$none
+			${title}(USAGE)$none
 
-				\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
+			\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
 
-				\tUsage: ${code}tp init <title> <git_url>${none}
+			\tUsage: ${code}tp init <title> <git_url>${none}
 
-				${title}(EXAMPLES)$none
+			${title}(EXAMPLES)$none
 
-				\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
-			END
+			\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -379,26 +411,26 @@ save_cmd() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
+			\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
 
-				\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
+			\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
 
-				${title}(USAGE)$none
+			${title}(USAGE)$none
 
-				\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
+			\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
 
-				\tUsages:
-				\t- ${code}tp save <commit_name>${none}
-				\t- ${code}tp save${none}
+			\tUsages:
+			\t- ${code}tp save <commit_name>${none}
+			\t- ${code}tp save${none}
 
-				${title}(EXAMPLES)$none
-				\t
-				\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
-				\t${code}tp save$none
-			END
+			${title}(EXAMPLES)$none
+			\t
+			\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
+			\t${code}tp save$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -438,29 +470,29 @@ archi_cmd() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
+			\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
 
-				\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
+			\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
 
-				${title}(USAGE)$none
+			${title}(USAGE)$none
 
-				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+			\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
+			\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
 
-				\tUsages:
-				\t- ${code}tp archi <tag_name>$none
-				\t- ${code}tp archi$none
+			\tUsages:
+			\t- ${code}tp archi <tag_name>$none
+			\t- ${code}tp archi$none
 
-				${title}(EXAMPLES)$none
+			${title}(EXAMPLES)$none
 
-				\t${code}tp archi "first"$none
-				\t${code}tp archi "0"$none
-				\t${code}tp archi$none
-			END
+			\t${code}tp archi "first"$none
+			\t${code}tp archi "0"$none
+			\t${code}tp archi$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -499,29 +531,29 @@ submit_cmd() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
+			\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
 
-				\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
+			\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
 
-				${title}(USAGE)$none
+			${title}(USAGE)$none
 
-				\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+			\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-				\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
+			\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
 
-				\tUsages:
-				\t- ${code}tp submit <tag_name>$none
-				\t- ${code}tp submit$none
+			\tUsages:
+			\t- ${code}tp submit <tag_name>$none
+			\t- ${code}tp submit$none
 
-				${title}(EXAMPLES)$none
+			${title}(EXAMPLES)$none
 
-				\t${code}tp submit "adamsromance"$none
-				\t${code}tp submit "first-try"$none
-				\t${code}tp submit$none
-			END
+			\t${code}tp submit "adamsromance"$none
+			\t${code}tp submit "first-try"$none
+			\t${code}tp submit$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -573,19 +605,19 @@ update_cmd() {
 	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
 		del_logfile
 		msg=$(
-			cat <<-END
-				${title}(DESCRIPTION)$none
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
 
-				\t${information}Update$none this command if an update is available.
+			\t${information}Update$none this command if an update is available.
 
-				${title}(USAGE)$none
+			${title}(USAGE)$none
 
-				\tUsage: ${code}tp update$none
+			\tUsage: ${code}tp update$none
 
-				${title}(EXAMPLES)$none
+			${title}(EXAMPLES)$none
 
-				\t${code}tp update$none
-			END
+			\t${code}tp update$none
+			EOF
 		)
 		myecho "$msg"
 		exit 0
@@ -670,25 +702,25 @@ help_cmd() {
 			;;
 		''|'help'|'-h'|'--help')
 			msg=$(
-				cat <<-END
-					${title}(DESCRIPTION)$none
+				cat <<-EOF
+				${title}(DESCRIPTION)$none
 
-					\t${information}Display the documentation$none associated with a given command.
+				\t${information}Display the documentation$none associated with a given command.
 
-					${title}(USAGE)$none
+				${title}(USAGE)$none
 
-					\tIt takes a parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
+				\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
 
-					\tUsage: ${code}tp help <command>$none
-					\tUsage: ${code}tp help$none
+				\tUsage: ${code}tp help <command>$none
+				\tUsage: ${code}tp help$none
 
-					${title}(EXAMPLES)$none
+				${title}(EXAMPLES)$none
 
-					\t${code}tp help init$none
-					\t${code}tp help submit$none
-					\t${code}tp help log$none
-					\t${code}tp help$none
-				END
+				\t${code}tp help init$none
+				\t${code}tp help submit$none
+				\t${code}tp help log$none
+				\t${code}tp help$none
+				EOF
 			)
 			myecho "$msg"
 			exit 0
@@ -706,39 +738,54 @@ help_cmd() {
 
 case "$1" in
 	# Aliases
+	'version'|'-v'|'--version')
+		shift
+		version_alias "$*"
+		;;
 	'log'|'lg')
-		log_alias "$2"
+		shift
+		log_alias "$*"
 		;;
 	'status'|'st')
-		status_alias "$2"
+		shift
+		status_alias "$*"
 		;;
 	'pull'|'sync')
-		pull_alias "$2"
+		shift
+		pull_alias "$*"
 		;;
 	'cfg'|'conf'|'config'|'configuration')
-		config_alias "$2"
+		shift
+		config_alias "$*"
 		;;
 	'test')
-		test_alias "$2"
+		shift
+		test_alias "$*"
 		;;
 	# Commands
 	'init')
-		init_cmd "$2" "$3"
+		shift
+		init_cmd "$*"
 		;;
 	'save')
-		save_cmd "$2"
+		shift
+		save_cmd "$*"
 		;;
 	'archi')
-		archi_cmd "$2" "$3"
+		shift
+		archi_cmd "$*"
 		;;
 	'submit')
-		submit_cmd "$2" "$3"
+		shift
+		submit_cmd "$*"
 		;;
 	'update')
-		update_cmd "$2"
+		shift
+		update_cmd "$*"
 		;;
-	'help')
-		help_cmd "$2"
+	'help'|'-h'|'--help')
+		shift
+		help_cmd "$*"
 		;;
 	*)
 		del_logfile
