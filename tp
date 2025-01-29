@@ -38,7 +38,7 @@ warn="${bright_yellow}WARNING:$none "
 # The path of the logfile
 logfile="$(mktemp '/tmp/tp-log-XXXXXXXXXXXXXXXXXXXX.log')"
 exec 3>&1          # redirect 3 -> 1
-exec &> "$logfile" # redirect 1 -> $logfile
+exec &> "$logfile" # redirect 1 & 2 -> $logfile
 
 
 ### Config management ###
@@ -627,7 +627,7 @@ update_cmd() {
 		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
 
 		rm '$logfile'
-		echo -e '\n$bold${green}Successfully updated!' >&3
+		echo -e '$bold${green}Successfully updated!' >&3
 		exit 0
 		EOF
 		log 'Executing the update script'
