@@ -19,8 +19,8 @@ curr_date="$( date +'%Y-%m-%d' )"
 curr_time="$( date +'%H:%M:%S' )"
 
 # The path of the logfile.
-logfile="$( mktemp "/tmp/tp-log-$date-XXXXXXXX.log" )"
-echo -e "### [ ${curr_date} | ${curr_time} ]" >> "$logfile"
+logfile="/tmp/tp-log-$curr_date.log"
+echo -e "\n### [ ${curr_date} | ${curr_time} ]\n\nCalled with \`$*\`\n" >> "$logfile"
 
 
 ##################################################
@@ -29,7 +29,7 @@ echo -e "### [ ${curr_date} | ${curr_time} ]" >> "$logfile"
 
 
 exec 3>&1          # redirect 3 -> 1
-exec &> "$logfile" # redirect 1 & 2 -> $logfile
+exec &>> "$logfile" # redirect 1 & 2 -> $logfile
 
 
 ##################################################
