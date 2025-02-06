@@ -94,7 +94,7 @@ else
 fi
 
 # Returns the value associated to the given key in the configuration file (<key>=<value>). If the configuration file is not valid (does not exists, cannot be read...), or if the key is not found, returns the default value given as second positional argument.
-get_config_key() {
+get_config_key() (
 
 	# The key to search in the configuration.
 	key="$1"
@@ -107,7 +107,7 @@ get_config_key() {
 		echo "$value"
 	fi
 
-}
+)
 
 # Whether short explanations are displayed while running.
 conf_log_on_std="$( get_config_key 'log_in_std' 'true' )"
@@ -121,25 +121,25 @@ conf_list_added_changes="$( get_config_key 'list_added_changes' 'false' )"
 
 
 # Prints the given string in the standard output.
-myecho() {
+myecho() (
 	
     echo -e "$*" >&3
 
-}
+)
 
 # Logs the given message. Writes it in the logfile and the standard output if conf_log_on_std is set to 'true'.
-log() {
+log() (
 
 	echo -e ">>> $*" # echoing to logfile
 	if [[ "$conf_log_on_std" == 'true' ]]; then
 		myecho "$decrease$msg...$none" # echoing to stdout
 	fi
 
-}
+)
 
 
 # Prints a warning in the standard output and in the log file.
-warn() {
+warn() (
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -150,10 +150,10 @@ warn() {
 		myecho "${yellow}Warning:$none $*"
 	fi
 
-}
+)
 
 # Shows a failure message and exit the execution with exit code 1.
-die() {
+die() (
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -165,10 +165,10 @@ die() {
 	fi
 	exit 1
 
-}
+)
 
 # Shows a success message and exit the execution with exit code 0.
-success() {
+success() (
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -178,7 +178,7 @@ success() {
 	fi
 	exit 0
 
-}
+)
 
 
 ##################################################
@@ -189,8 +189,8 @@ success() {
 archi_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -220,7 +220,7 @@ archi_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -229,6 +229,7 @@ archi_cmd() (
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-a'|'--add')
 				added_files="$added_files $2"
@@ -282,8 +283,8 @@ archi_cmd() (
 help_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -309,7 +310,7 @@ help_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	case "$1" in
 		'log'|'lg')
@@ -349,8 +350,8 @@ help_cmd() (
 init_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -372,7 +373,7 @@ init_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -387,6 +388,7 @@ init_cmd() (
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'--name')
 				directory_name="$2"
@@ -474,8 +476,8 @@ init_cmd() (
 log_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -491,12 +493,13 @@ log_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -520,8 +523,8 @@ log_cmd() (
 pull_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -537,12 +540,13 @@ pull_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -571,8 +575,8 @@ pull_cmd() (
 save_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -599,7 +603,7 @@ save_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -610,6 +614,7 @@ save_cmd() (
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-a'|'--add')
 				added_files="$added_files $2"
@@ -670,8 +675,8 @@ save_cmd() (
 status_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -687,12 +692,13 @@ status_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -717,8 +723,8 @@ status_cmd() (
 submit_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -748,7 +754,7 @@ submit_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -757,6 +763,7 @@ submit_cmd() (
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-a'|'--add')
 				added_files="$added_files $2"
@@ -819,8 +826,8 @@ submit_cmd() (
 test_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -836,12 +843,13 @@ test_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -867,8 +875,8 @@ test_cmd() (
 update_cmd() (
 
 	# Display the help and exit the script.
-	show_help
-	{
+	show_help()
+	(
 
 		msg="$(
 			cat <<-EOF
@@ -889,7 +897,7 @@ update_cmd() (
 		myecho "$msg"
 		exit 0
 
-	}
+	)
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -898,6 +906,7 @@ update_cmd() (
 		case "$1" in
 			'-h'|'--help')
 				show_help
+				exit 0
 				;;
 			'-a'|'--add')
 				added_files="$added_files $2"
@@ -982,31 +991,40 @@ update_cmd() (
 ##################################################
 
 
-cmd="$1"
+first="$1"
 shift
 
-case "$cmd" in
+case "$first" in
 	'log'|'lg')
-		log_cmd "$*" ;;
+		log_cmd "$*"
+		;;
 	'status'|'st')
-		status_cmd "$*" ;;
+		status_cmd "$*"
+		;;
 	'pull'|'sync')
-		pull_cmd "$*" ;;
+		pull_cmd "$*"
+		;;
 	'test')
-		test_cmd "$*" ;;
+		test_cmd "$*"
+		;;
 	'init')
-		init_cmd "$*" ;;
+		init_cmd "$*"
+		;;
 	'save')
-		save_cmd "$*" ;;
+		save_cmd "$*"
+		;;
 	'archi')
-		archi_cmd "$*" ;;
+		archi_cmd "$*"
+		;;
 	'submit')
-		submit_cmd "$*" ;;
+		submit_cmd "$*"
+		;;
 	'update')
-		update_cmd "$*" ;;
+		update_cmd "$*"
+		;;
 	'help'|'-h'|'--help')
-		echo "$1"
-		help_cmd "$*"  ;;
+		help_cmd "$*"
+		;;
 	'-v'|'--version')
 		myecho "$version"
 		exit 0
@@ -1016,7 +1034,9 @@ case "$cmd" in
 		exit 0
 		;;
 	'-'*|'--'*)
-		die "Unknown option $1" ;;
+		die "Unknown option $1"
+		;;
 	*)
-		die "Invalid command $1. Check out ${code}tp help$none." ;;
+		die "Invalid command $1. Check out ${code}tp help$none."
+		;;
 esac
