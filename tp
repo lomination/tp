@@ -96,7 +96,7 @@ else
 fi
 
 # Returns the value associated to the given key in the configuration file (<key>=<value>). If the configuration file is not valid (does not exists, cannot be read...), or if the key is not found, returns the default value given as second positional argument.
-get_config_key() (
+get_config_key() {
 
 	# The key to search in the configuration.
 	key="$1"
@@ -113,7 +113,7 @@ get_config_key() (
 		echo "$default"
 	fi
 
-)
+}
 
 # Whether short explanations are displayed while running.
 conf_log_on_std="$( get_config_key 'log_in_std' 'true' )"
@@ -127,25 +127,25 @@ conf_list_added_changes="$( get_config_key 'list_added_changes' 'false' )"
 
 
 # Prints the given string in the standard output.
-myecho() (
+myecho() {
 	
     echo -e "$*" >&3
 
-)
+}
 
 # Logs the given message. Writes it in the logfile and the standard output if conf_log_on_std is set to 'true'.
-log() (
+log() {
 
 	echo -e ">>> $*" # echoing to logfile
 	if [[ "$conf_log_on_std" == 'true' ]]; then
 		myecho "$decrease$msg...$none" # echoing to stdout
 	fi
 
-)
+}
 
 
 # Prints a warning in the standard output and in the log file.
-warn() (
+warn() {
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -156,10 +156,10 @@ warn() (
 		myecho "${yellow}Warning:$none $*"
 	fi
 
-)
+}
 
 # Shows a failure message and exit the execution with exit code 1.
-die() (
+die() {
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -171,10 +171,10 @@ die() (
 	fi
 	exit 1
 
-)
+}
 
 # Shows a success message and exit the execution with exit code 0.
-success() (
+success() {
 
 	msg="$*"
 	if [[ -z "$msg" ]]; then
@@ -184,7 +184,7 @@ success() (
 	fi
 	exit 0
 
-)
+}
 
 
 ##################################################
@@ -192,40 +192,34 @@ success() (
 ##################################################
 
 
-archi_cmd() (
+archi_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
 
-			\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
+		\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
 
-			\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-			\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+		\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
 
-			\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
+		\tUsages:
+		\t- ${code}tp archi <tag_name>$none
+		\t- ${code}tp archi$none
 
-			\tUsages:
-			\t- ${code}tp archi <tag_name>$none
-			\t- ${code}tp archi$none
+		${title}(EXAMPLES)$none
 
-			${title}(EXAMPLES)$none
-
-			\t${code}tp archi "first"$none
-			\t${code}tp archi "0"$none
-			\t${code}tp archi$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp archi "first"$none
+		\t${code}tp archi "0"$none
+		\t${code}tp archi$none
+		EOF
+	)"
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -233,7 +227,7 @@ archi_cmd() (
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-a'|'--add')
@@ -277,7 +271,7 @@ archi_cmd() (
 
 	success
 
-)
+}
 
 
 ##################################################
@@ -285,36 +279,30 @@ archi_cmd() (
 ##################################################
 
 
-help_cmd() (
+help_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\t${information}Display the documentation$none associated with a given command.
 
-			\t${information}Display the documentation$none associated with a given command.
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
 
-			\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
+		\tUsage: ${code}tp help <command>$none
+		\tUsage: ${code}tp help$none
 
-			\tUsage: ${code}tp help <command>$none
-			\tUsage: ${code}tp help$none
+		${title}(EXAMPLES)$none
 
-			${title}(EXAMPLES)$none
-
-			\t${code}tp help init$none
-			\t${code}tp help submit$none
-			\t${code}tp help log$none
-			\t${code}tp help$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp help init$none
+		\t${code}tp help submit$none
+		\t${code}tp help log$none
+		\t${code}tp help$none
+		EOF
+	)"
 
 	case "$1" in
 		'log'|'lg')
@@ -336,14 +324,16 @@ help_cmd() (
 		'update')
 			update_cmd '--help' ;;
 		''|'help'|'-h'|'--help')
-			show_help ;;
+			myecho "$help_msg"
+			exit 0
+			;;
 		'-'*|'--'*)
 			die "Unknown option $1" ;;
 		*)
 			die "Invalid command $1. Check out ${code}tp help$none." ;;
 	esac
 
-)
+}
 
 
 ##################################################
@@ -351,32 +341,26 @@ help_cmd() (
 ##################################################
 
 
-init_cmd() (
+init_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
 
-			\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
 
-			\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
+		\tUsage: ${code}tp init <title> <git_url>${none}
 
-			\tUsage: ${code}tp init <title> <git_url>${none}
+		${title}(EXAMPLES)$none
 
-			${title}(EXAMPLES)$none
-
-			\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
+		EOF
+	)"
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -390,7 +374,7 @@ init_cmd() (
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'--name')
@@ -468,7 +452,7 @@ init_cmd() (
 
 	success
 
-)
+}
 
 
 ##################################################
@@ -476,31 +460,25 @@ init_cmd() (
 ##################################################
 
 
-log_cmd() (
+log_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThis command is an alias of the ${code}git log$none command.
 
-			\tThis command is an alias of the ${code}git log$none command.
+		${title}(EXAMPLE)$none
 
-			${title}(EXAMPLE)$none
-
-			\t${code}tp log$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp log$none
+		EOF
+	)"
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-'*|'--'*)
@@ -514,7 +492,7 @@ log_cmd() (
 
 	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >&3
 
-)
+}
 
 
 ##################################################
@@ -522,31 +500,25 @@ log_cmd() (
 ##################################################
 
 
-pull_cmd() (
+pull_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThis command is an alias of the ${code}git pull$none command.
 
-			\tThis command is an alias of the ${code}git pull$none command.
+		${title}(EXAMPLE)$none
 
-			${title}(EXAMPLE)$none
-
-			\t${code}tp pull$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp pull$none
+		EOF
+	)"
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-'*|'--'*)
@@ -565,7 +537,7 @@ pull_cmd() (
 		success 'The repository is already up-to-date.'
 	fi
 
-)
+}
 
 
 ##################################################
@@ -573,37 +545,31 @@ pull_cmd() (
 ##################################################
 
 
-save_cmd() (
+save_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
 
-			\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
+		\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
 
-			\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
 
-			\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
+		\tUsages:
+		\t- ${code}tp save <commit_name>${none}
+		\t- ${code}tp save${none}
 
-			\tUsages:
-			\t- ${code}tp save <commit_name>${none}
-			\t- ${code}tp save${none}
-
-			${title}(EXAMPLES)$none
-			\t
-			\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
-			\t${code}tp save$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		${title}(EXAMPLES)$none
+		\t
+		\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
+		\t${code}tp save$none
+		EOF
+	)"
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -613,7 +579,7 @@ save_cmd() (
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-a'|'--add')
@@ -664,7 +630,7 @@ save_cmd() (
 
 	success
 
-)
+}
 
 
 ##################################################
@@ -672,31 +638,25 @@ save_cmd() (
 ##################################################
 
 
-status_cmd() (
+status_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThis command is an alias of the ${code}git status$none command.
 
-			\tThis command is an alias of the ${code}git status$none command.
+		${title}(EXAMPLE)$none
 
-			${title}(EXAMPLE)$none
-
-			\t${code}tp status$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp status$none
+		EOF
+	)"
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-'*|'--'*)
@@ -711,7 +671,7 @@ status_cmd() (
 
 	git status -sb >&3
 
-)
+}
 
 
 ##################################################
@@ -719,40 +679,34 @@ status_cmd() (
 ##################################################
 
 
-submit_cmd() (
+submit_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
 
-			\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
+		\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
 
-			\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
 
-			\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+		\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
 
-			\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
+		\tUsages:
+		\t- ${code}tp submit <tag_name>$none
+		\t- ${code}tp submit$none
 
-			\tUsages:
-			\t- ${code}tp submit <tag_name>$none
-			\t- ${code}tp submit$none
+		${title}(EXAMPLES)$none
 
-			${title}(EXAMPLES)$none
-
-			\t${code}tp submit "adamsromance"$none
-			\t${code}tp submit "first-try"$none
-			\t${code}tp submit$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp submit "adamsromance"$none
+		\t${code}tp submit "first-try"$none
+		\t${code}tp submit$none
+		EOF
+	)"
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -760,7 +714,7 @@ submit_cmd() (
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-a'|'--add')
@@ -813,7 +767,7 @@ submit_cmd() (
 
 	success
 
-)
+}
 
 
 ##################################################
@@ -821,31 +775,25 @@ submit_cmd() (
 ##################################################
 
 
-test_cmd() (
+test_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\tThis command runs the tests of the current dotnet solution.
 
-			\tThis command runs the tests of the current dotnet solution.
+		${title}(EXAMPLE)$none
 
-			${title}(EXAMPLE)$none
-
-			\t${code}tp test$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp test$none
+		EOF
+	)"
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-'*|'--'*)
@@ -860,7 +808,7 @@ test_cmd() (
 	dotnet test --nologo -v q
 	dotnet clean &> /dev/null
 
-)
+}
 
 
 ##################################################
@@ -868,31 +816,25 @@ test_cmd() (
 ##################################################
 
 
-update_cmd() (
+update_cmd() {
 
 	# Display the help and exit the script.
-	show_help() (
+	help_msg="$(
+		cat <<-EOF
+		${title}(DESCRIPTION)$none
 
-		msg="$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+		\t${information}Update$none this command if an update is available.
 
-			\t${information}Update$none this command if an update is available.
+		${title}(USAGE)$none
 
-			${title}(USAGE)$none
+		\tUsage: ${code}tp update$none
 
-			\tUsage: ${code}tp update$none
+		${title}(EXAMPLES)$none
 
-			${title}(EXAMPLES)$none
-
-			\t${code}tp update$none
-			\t${code}tp submit$none
-			EOF
-		)"
-		myecho "$msg"
-		exit 0
-
-	)
+		\t${code}tp update$none
+		\t${code}tp submit$none
+		EOF
+	)"
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
@@ -900,7 +842,7 @@ update_cmd() (
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
-				show_help
+				myecho "$help_msg"
 				exit 0
 				;;
 			'-a'|'--add')
@@ -978,7 +920,7 @@ update_cmd() (
 		exec "$update_script_path" || die 'Could not exectute the update script'
 	fi
 
-)
+}
 
 
 ##################################################
