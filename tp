@@ -195,8 +195,7 @@ success() (
 archi_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -289,8 +288,7 @@ archi_cmd() (
 help_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -356,8 +354,7 @@ help_cmd() (
 init_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -482,8 +479,7 @@ init_cmd() (
 log_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -529,8 +525,7 @@ log_cmd() (
 pull_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -581,8 +576,7 @@ pull_cmd() (
 save_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -681,8 +675,7 @@ save_cmd() (
 status_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -729,8 +722,7 @@ status_cmd() (
 submit_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -832,8 +824,7 @@ submit_cmd() (
 test_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
@@ -859,7 +850,6 @@ test_cmd() (
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
-
 				;;
 			*)
 				die "Unexpected argument $1"
@@ -881,8 +871,7 @@ test_cmd() (
 update_cmd() (
 
 	# Display the help and exit the script.
-	show_help()
-	(
+	show_help() (
 
 		msg="$(
 			cat <<-EOF
