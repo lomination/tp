@@ -5,51 +5,87 @@
 # This code is under license GNU General Public License version 3.
 
 
-version=0.1.0
+##################################################
+#                   CONSTANTS                    #
+##################################################
 
 
-### Ansi escape codes ###
+# The version of this script.
+version='0.1.0'
 
-none='\033[0m'
-bold='\033[1m'
-decrease='\033[2m'
-italics='\033[3m'
-underline='\033[4m'
-reverse='\033[7m'
-red='\033[31m'
-green='\033[32m'
-yellow='\033[33m'
-blue='\033[34m'
-magenta='\033[35m'
-white='\033[37m'
-framed='\033[51m'
-bright_yellow='\033[93m'
-bright_blue='\033[94m'
+# The date.
+curr_date="$( date +'%Y-%m-%d' )"
+# The time.
+curr_time="$( date +'%H:%M:%S' )"
+
+# The path of the logfile.
+logfile="$( mktemp "/tmp/tp-log-$date-XXXXXXXX.log" )"
+echo -e "### [ ${curr_date} | ${curr_time} ]" >> "$logfile"
 
 
-### Styles ###
-
-code="$italics$green"
-information="$underline"
-title="$bold$reverse"
-note="${bright_blue}NOTE:$none "
-warn="${bright_yellow}WARNING:$none "
+##################################################
+#                FILE DESCRIPTORS                #
+##################################################
 
 
-### Outputs management ###
-
-# The path of the logfile
-logfile="$(mktemp '/tmp/tp-log-XXXXXXXXXXXXXXXXXXXX.log')"
 exec 3>&1          # redirect 3 -> 1
 exec &> "$logfile" # redirect 1 & 2 -> $logfile
 
 
-### Config management ###
+##################################################
+#                     STYLES                     #
+##################################################
 
-# The path to the conf
+
+# All attributes become turned off.
+none='\033[0m'
+# Increases the intensity of the text.
+bold='\033[1m'
+# Decreases the intensity of the text.
+decrease='\033[2m'
+# Makes the text in italics.
+italics='\033[3m'
+# Underlines the text.
+underline='\033[4m'
+# Reverses the colors of the background and the foreground.
+reverse='\033[7m'
+# Makes the text red.
+red='\033[31m'
+# Makes the text green.
+green='\033[32m'
+# Makes the text yellow.
+yellow='\033[33m'
+# Makes the text blue.
+blue='\033[34m'
+# Makes the text magenta.
+magenta='\033[35m'
+# Makes the text white.
+white='\033[37m'
+# Makes the text bright yellow.
+bright_yellow='\033[93m'
+# Makes the text bright blue.
+bright_blue='\033[94m'
+
+# The style for code display.
+code="$italics$green"
+# The style for the important information.
+information="$underline"
+# The style for title display.
+title="$bold$reverse"
+# The style for a note display in any documentation paragraph.
+note="$blue"
+# The style for a warning display in any documentation paragraph.
+warning="$yellow"
+
+
+##################################################
+#                     CONFIG                     #
+##################################################
+
+
+# The path to the configuration file.
 conf_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/tp.conf"
-
-# Is 'true' or 'false' depending on whether the configuration file exists
+# Is 'true' or 'false' depending on whether the configuration file exists and is valid.
 conf_is_valid=''
 if [[ -f "$conf_path" ]] && [[ -r "$conf_path" ]]; then
 	conf_is_valid='true'
@@ -57,419 +93,106 @@ else
 	conf_is_valid='false'
 fi
 
-# Returns 'true' or 'false' depending on the value of the given key in the configuration.
-# If the key is not found, returns the given default value. If the configuration file
-# contains '<key>=true' and '<key>=false', returns true.
-#
-# Takes as parameter the searched key and the default value 'true' or 'false'.
-conf_contains() {
+# Returns the value associated to the given key in the configuration file (<key>=<value>). If the configuration file is not valid (does not exists, cannot be read...), or if the key is not found, returns the default value given as second positional argument.
+get_config_key() {
 
-	# The key to search in the configuration
-	pattern="$1"
-	# The default value of the searched key
+	# The key to search in the configuration.
+	key="$1"
+	# The default value of the searched key.
 	default="$2"
-	if [[ "$conf_is_valid" == 'false' ]]; then
+    value="$( grep -G "^$key=" "$conf_path" | cut -d'=' -f2 )"
+	if [[ -z "$value" ]]; then
 		echo "$default"
-	elif [[ "$(cat "$conf_path")" == *"${pattern}=true"* ]]; then
-		echo 'true'
-	elif [[ "$(cat "$conf_path")" == *"${pattern}=false"* ]]; then
-		echo 'false'
 	else
-		echo "$default"
+		echo "$value"
 	fi
 
 }
 
-# Whether short explanations are displayed while running
-conf_log_on_std="$(conf_contains 'log_in_std' 'true')"
+# Whether short explanations are displayed while running.
+conf_log_on_std="$( get_config_key 'log_in_std' 'true' )"
+# Whether added changes are displayed when git add is performed.
+conf_list_added_changes="$( get_config_key 'list_added_changes' 'false' )"
 
-# Whether added changes are displayed when git add is performed
-conf_list_added_changes="$(conf_contains 'list_added_changes' 'false')"
 
+##################################################
+#                   FUNCTIONS                    #
+##################################################
 
-### Utility functions ###
 
 # Prints the given string in the standard output.
 myecho() {
-
-	msg="$1"
-	echo -e "$msg" >&3 # TODO
+	
+    echo -e "$*" >&3
 
 }
 
 # Logs the given message. Writes it in the logfile and the standard output if conf_log_on_std is set to 'true'.
 log() {
 
-	msg="$1"
-	# echoing to logfile
-	echo -e ">>> $msg"
-	# echoing to stdout
+	echo -e ">>> $*" # echoing to logfile
 	if [[ "$conf_log_on_std" == 'true' ]]; then
-		myecho "$decrease$msg...$none"
+		myecho "$decrease$msg...$none" # echoing to stdout
 	fi
 
 }
 
-# Removes the current logfile given as parameter.
-del_logfile() {
 
-	rm "$logfile"
+# Prints a warning in the standard output and in the log file.
+warn() {
+
+	msg="$*"
+	if [[ -z "$msg" ]]; then
+		echo -e "Warning."
+		myecho "${yellow}Warning.$none"
+	else
+		echo -e "Warning: $*"
+		myecho "${yellow}Warning:$none $*"
+	fi
 
 }
 
 # Shows a failure message and exit the execution with exit code 1.
 die() {
 
-	msg="$1"
+	msg="$*"
 	if [[ -z "$msg" ]]; then
-		myecho "$bold${red}Fatal error!$none (logfile: $logfile)"
+		echo -e "Fatal error"
+		myecho "${red}Fatal error!$none (logfile: $logfile)"
 	else
 		echo -e "Fatal error: $msg"
-		myecho "$bold${red}Fatal error:$none $msg (logfile: $logfile)"
+		myecho "${red}Fatal error:$none $msg (logfile: $logfile)"
 	fi
 	exit 1
 
 }
 
-# Shows a success message and exit the execution with exit code 0. Also removes the current logfile.
+# Shows a success message and exit the execution with exit code 0.
 success() {
 
-	msg="$1"
-	del_logfile
+	msg="$*"
 	if [[ -z "$msg" ]]; then
-		myecho "$bold${green}Success!$none"
+		myecho "${green}Success!$none"
 	else
-		myecho "$bold${green}Success:$none $msg"
+		myecho "${green}Success:$none $msg"
 	fi
 	exit 0
 
 }
 
 
-### Aliases ###
+##################################################
+#                 ARCHI COMMAND                  #
+##################################################
 
-# Displays the version of this script.
-version_alias() {
 
-	del_logfile
+archi_cmd() (
 
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
+	# Display the help and exit the script.
+	show_help
+	{
 
-			\tThis command prints the current version of this script in the standard output.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp version$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	myecho "Version $version"
-	exit 0
-
-}
-
-
-# Shows git log.
-log_alias() {
-
-	del_logfile
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command is an alias of the ${code}git log$none command.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp log$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >&3
-	exit 0
-
-}
-
-
-# Show git status.
-status_alias() {
-
-	del_logfile
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command is an alias of the ${code}git status$none command.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp status$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	git status -sb >&3
-	exit 0
-
-}
-
-# Pulls the remote repository
-pull_alias() {
-
-	del_logfile
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command is an alias of the ${code}git pull$none command.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp pull$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	git pull
-	success 'repository successfully pulled!'
-
-}
-
-# Prints the path of the config
-config_alias() {
-
-	del_logfile
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command prints the path to the config in the standard output.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp status$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	myecho "Path to the configuration: $conf_path (validity: $conf_is_valid)\n${note}the config has to follow the format ${code}<key>=<value>$none"
-	exit 0
-
-}
-
-
-# Prints the path of the config
-test_alias() {
-
-	del_logfile
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command runs the tests of the current dotnet solution.
-
-			${title}(EXAMPLE)$none
-
-			\t${code}tp test$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	dotnet test --nologo -v q
-	dotnet clean &> /dev/null
-	exit 0
-
-}
-
-
-### Commands ###
-
-# Creates the practical environment.
-init_cmd() {
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
-
-			${title}(USAGE)$none
-
-			\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
-
-			\tUsage: ${code}tp init <title> <git_url>${none}
-
-			${title}(EXAMPLES)$none
-
-			\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	# The title of the practical
-	title="$1"
-
-	# The url to the git repository of the practical.
-	git_url="$2"
-
-	# Check if the given arguments are valid
-	log 'Checking arguments'
-	if [[ -z "$title" ]]; then
-		die "Missing required argument 'title' at position 1. Check out ${code}tp help init$none."
-	fi
-	if [[ -z "$git_url" ]]; then
-		die "Missing required argument 'git_url' at position 2. Check out ${code}tp help init$none."
-	fi
-
-	# Clone the git repository
-	log 'Cloning the repository'
-	git clone "$git_url" "$title" || die
-
-	# Go to the cloned repository
-	cd "$title"
-
-	# Create dotnet solution
-	log 'Creating the dotnet solution'
-	dotnet new sln --name "$title" || die
-
-	# Create main project
-	log 'Creating the dotnet console project'
-	dotnet new console -n "$title" -f net7.0 -lang 'C#' || die
-	dotnet sln add "$title/$title.csproj" || die
-
-	# Create test project
-	log 'Creating the dotnet xunit project'
-	dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die
-	dotnet sln add 'Tests/Tests.csproj' || die
-	rm 'Tests/UnitTest1.cs'
-	dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die
-	echo -e "\nglobal using $title;" >> 'Tests/GlobalUsings.cs' || die
-
-	# Create the .gitignore and README files
-	log 'Creating the .gitignore and README files'
-	echo -e 'bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user\n.vscode' > .gitignore || die
-	echo "$title" > README || die
-
-	# Push the changes on the remote
-	log 'Synchronizing the git remote'
-	git add -A || die
-	git commit -m 'First commit'  || die
-	git push || die
-
-	success
-}
-
-
-# Pushes the work on the intra.
-save_cmd() {
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			${title}(DESCRIPTION)$none
-
-			\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
-
-			\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
-
-			${title}(USAGE)$none
-
-			\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
-
-			\tUsages:
-			\t- ${code}tp save <commit_name>${none}
-			\t- ${code}tp save${none}
-
-			${title}(EXAMPLES)$none
-			\t
-			\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
-			\t${code}tp save$none
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
-
-	# Testing if there are changes to commit
-	if [[ $(git status --porcelain | wc -l) == '0' ]]; then
-		success 'Nothing to commit, the git working tree is clean.'
-	fi
-
-	# Choosing a commit name
-	if [[ -n "$1" ]]; then
-		commit="$1"
-	else
-		commit="Commit-$(openssl rand -hex 4)"
-	fi
-
-	# Commit the changes
-	log 'Committing changes'
-	git add -A || die
-	[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
-	git commit -m "$commit" || die
-
-	# Push the commit
-	log 'Synchronizing the git remote'
-	git push || die
-
-	success
-
-}
-
-
-# Pushes an archi tag.
-archi_cmd() {
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
+		msg="$(
 			cat <<-EOF
 			${title}(DESCRIPTION)$none
 
@@ -493,44 +216,511 @@ archi_cmd() {
 			\t${code}tp archi "0"$none
 			\t${code}tp archi$none
 			EOF
-		)
+		)"
 		myecho "$msg"
 		exit 0
-	fi
 
-	if [[ $(git status --porcelain | wc -l) -ne '0' ]]; then
-		del_logfile
+	}
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-a'|'--add')
+				added_files="$added_files $2"
+				shift 2
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	if [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
 		myecho "${red}Error:$none there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
 		exit 0
 	fi
 
-	# Choose a commit and tag name
+	# The name of the git tag.
+	tag_name=''
+	# Choose a tag name
 	if [[ -n "$1" ]]; then
-		commit="$1"
+		tag_name="$1"
 	else
-		commit="$(openssl rand -hex 4)"
+		tag_name="$( openssl rand -hex 4 )"
 	fi
-	
+
 	# Create a tag
 	log 'Creating the tag'
-	git tag -ma "archi-$tag" || die
+	git tag -ma "archi-$tag_name" || die 'Failed to create the git tag.'
 
 	# Push the tag and the commit
 	log 'Synchronizing the git remote'
-	git push --follow-tags || die
+	git push --follow-tags || die 'Failed to push to the remote repository.'
 
 	success
 
-}
+)
 
 
-# Pushes a submit tag.
-submit_cmd() {
+##################################################
+#                 HELP COMMAND                   #
+##################################################
 
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
+
+help_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\t${information}Display the documentation$none associated with a given command.
+
+			${title}(USAGE)$none
+
+			\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
+
+			\tUsage: ${code}tp help <command>$none
+			\tUsage: ${code}tp help$none
+
+			${title}(EXAMPLES)$none
+
+			\t${code}tp help init$none
+			\t${code}tp help submit$none
+			\t${code}tp help log$none
+			\t${code}tp help$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	case "$1" in
+		'log'|'lg')
+			log_cmd '--help' ;;
+		'status'|'st')
+			status_cmd '--help' ;;
+		'pull'|'sync')
+			pull_cmd '--help' ;;
+		'test')
+			test_cmd '--help' ;;
+		'init')
+			init_cmd '--help' ;;
+		'save')
+			save_cmd '--help' ;;
+		'archi')
+			archi_cmd '--help' ;;
+		'submit')
+			submit_cmd '--help' ;;
+		'update')
+			update_cmd '--help' ;;
+		''|'help'|'-h'|'--help')
+			show_help ;;
+		'-'*|'--'*)
+			die "Unknown option $1" ;;
+		*)
+			die "Invalid command $1. Check out ${code}tp help$none." ;;
+	esac
+
+)
+
+
+##################################################
+#                 INIT COMMAND                   #
+##################################################
+
+
+init_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
+
+			${title}(USAGE)$none
+
+			\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
+
+			\tUsage: ${code}tp init <title> <git_url>${none}
+
+			${title}(EXAMPLES)$none
+
+			\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+	# Whether a README file should be created or not.
+	create_readme='true'
+	# The content of the REAMDE. If empty, the default value is the title of the practical.
+	readme_content=''
+	# The local name of the clone repository. If empty, the default value is the title of the practicals.
+	directory_name=''
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'--name')
+				directory_name="$2"
+				shift 2
+				;;
+			'--readme')
+				readme_content="$2"
+				shift 2
+				;;
+			'--no-readme')
+				create_readme='false'
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	# The title of the practical
+	title="$1"
+	# The url to the git repository of the practical
+	git_url="$2"
+
+	# Check if the given arguments are valid
+	log 'Checking arguments'
+	if [[ -z "$title" ]]; then
+		die "Missing required argument 'title' at position 1. Check out ${code}tp help init$none."
+	fi
+	if [[ -z "$git_url" ]]; then
+		die "Missing required argument 'git_url' at position 2. Check out ${code}tp help init$none."
+	fi
+
+	# Clone the git repository
+	log 'Cloning the repository'
+	git clone "$git_url" "$title" || die 'Failed to clone the git repository.'
+
+	# Go to the cloned repository
+	cd "$title"
+
+	# Create dotnet solution
+	log 'Creating the dotnet solution'
+	dotnet new sln --name "$title" || die 'Failed to create the dotnet solution.'
+
+	# Create main project
+	log 'Creating the dotnet console project'
+	dotnet new console -n "$title" -f net7.0 -lang 'C#' || die 'Failed to create the main project.'
+	dotnet sln add "$title/$title.csproj" || die 'Failed to add the main project to the dotnet solution.'
+
+	# Create test project
+	log 'Creating the dotnet xunit project'
+	dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die 'Failed to create the XUnit test project.'
+	dotnet sln add 'Tests/Tests.csproj' || die 'Failed to add the test project to the dotnet solution.'
+	rm 'Tests/UnitTest1.cs' || warn 'Failed to remove the unit test file template Tests/UnitTest1.cs.'
+	dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die 'Failed to add reference between the test project and the main project.'
+	echo -e "\nglobal using $title;\n" >> 'Tests/GlobalUsings.cs' || warn 'Failed to add the main namespace in the Usings file.'
+
+	# Create the .gitignore and README files
+	log 'Creating the .gitignore and README files'
+	echo -e 'bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user\n.vscode' > .gitignore || die
+	echo "$title" > README || die
+
+	# Push the changes on the remote
+	log 'Synchronizing the git remote'
+	git add -A || die
+	git commit -m 'First commit'  || die
+	git push || die
+
+	success
+
+)
+
+
+##################################################
+#                  LOG COMMAND                   #
+##################################################
+
+
+log_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command is an alias of the ${code}git log$none command.
+
+			${title}(EXAMPLE)$none
+
+			\t${code}tp log$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				die "Unexpected argument $1"
+				;;
+		esac
+	done
+
+	git log --color --graph --pretty=format:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -- >&3
+
+)
+
+
+##################################################
+#                 PULL COMMAND                   #
+##################################################
+
+
+pull_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command is an alias of the ${code}git pull$none command.
+
+			${title}(EXAMPLE)$none
+
+			\t${code}tp pull$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				die "Unexpected argument $1"
+				;;
+		esac
+	done
+
+	if git status -uno | grep -q "Your branch is behind" ; then
+		git pull >&3 || die 'Failed to pull from remote.'
+		success
+	else
+		success 'The repository is already up-to-date.'
+	fi
+
+)
+
+
+##################################################
+#                  SAVE COMMAND                  #
+##################################################
+
+
+save_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
+
+			\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
+
+			${title}(USAGE)$none
+
+			\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
+
+			\tUsages:
+			\t- ${code}tp save <commit_name>${none}
+			\t- ${code}tp save${none}
+
+			${title}(EXAMPLES)$none
+			\t
+			\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
+			\t${code}tp save$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+	# The files to add to the commit. If empty, add all changed files.
+	added_files=''
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-a'|'--add')
+				added_files="$added_files $2"
+				shift 2
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	# The name of the commit.
+	commit_name="$1"
+
+	# Testing if there are changes to commit
+	if [[ "$( git status --porcelain | wc -l )" == '0' ]]; then
+		success 'Nothing to commit, the git working tree is clean.'
+	fi
+
+	# Choosing a commit name
+	if [[ -n "$1" ]]; then
+		commit="$1"
+	else
+		commit="Commit-$( openssl rand -hex 4 )"
+	fi
+
+	# Commit the changes
+	log 'Committing changes'
+	if [[ "$added_files" == '' ]]; then
+		git add -A || die 'Failed to add all changed files to the git index.'
+	else
+		git add "$added_files" || die 'Failed to add given files to the git index.'
+	fi
+	[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
+	git commit -m "$commit" || die 'Failed to create the git commit.'
+
+	# Push the commit
+	log 'Synchronizing the git remote'
+	git push || die 'Failed to push to the remote repository.'
+
+	success
+
+)
+
+
+##################################################
+#                STATUS COMMAND                  #
+##################################################
+
+
+status_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command is an alias of the ${code}git status$none command.
+
+			${title}(EXAMPLE)$none
+
+			\t${code}tp status$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+
+				;;
+			*)
+				die "Unexpected argument $1"
+				;;
+		esac
+	done
+
+	git status -sb >&3
+
+)
+
+
+##################################################
+#                 SUBMIT COMMAND                 #
+##################################################
+
+
+submit_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
 			cat <<-EOF
 			${title}(DESCRIPTION)$none
 
@@ -554,18 +744,41 @@ submit_cmd() {
 			\t${code}tp submit "first-try"$none
 			\t${code}tp submit$none
 			EOF
-		)
+		)"
 		myecho "$msg"
 		exit 0
-	fi
 
-	if [[ $(git status --porcelain | wc -l) -ne '0' ]]; then
-		del_logfile
-		myecho "${red}Error:$none there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
+	}
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-a'|'--add')
+				added_files="$added_files $2"
+				shift 2
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	if [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
+		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
 		exit 0
 	fi
-
-	# Ask for user confirmation
 
 	# The number the user must enter
 	num="$(shuf -i 100000-999999 -n 1)"
@@ -584,7 +797,7 @@ submit_cmd() {
 	else
 		commit="$(openssl rand -hex 4)"
 	fi
-	
+
 	# Create a tag
 	log 'Creating the tag'
 	git tag -ma "submit-$tag" || die
@@ -595,16 +808,69 @@ submit_cmd() {
 
 	success
 
-}
+)
 
 
-# Updates this script.
-update_cmd() {
+##################################################
+#                 TEST COMMAND                   #
+##################################################
 
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
+
+test_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
+			cat <<-EOF
+			${title}(DESCRIPTION)$none
+
+			\tThis command runs the tests of the current dotnet solution.
+
+			${title}(EXAMPLE)$none
+
+			\t${code}tp test$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+
+				;;
+			*)
+				die "Unexpected argument $1"
+				;;
+		esac
+	done
+
+	dotnet test --nologo -v q
+	dotnet clean &> /dev/null
+
+)
+
+
+##################################################
+#                UPDATE COMMAND                  #
+##################################################
+
+
+update_cmd() (
+
+	# Display the help and exit the script.
+	show_help
+	{
+
+		msg="$(
 			cat <<-EOF
 			${title}(DESCRIPTION)$none
 
@@ -617,6 +883,45 @@ update_cmd() {
 			${title}(EXAMPLES)$none
 
 			\t${code}tp update$none
+			\t${code}tp submit$none
+			EOF
+		)"
+		myecho "$msg"
+		exit 0
+
+	}
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				show_help
+				;;
+			'-a'|'--add')
+				added_files="$added_files $2"
+				shift 2
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	# Display help
+	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
+		del_logfile
+		msg=$(
+			cat <<-EOF
+			
 			EOF
 		)
 		myecho "$msg"
@@ -669,127 +974,49 @@ update_cmd() {
 		exec "$update_script_path" || die 'Could not exectute the update script'
 	fi
 
-}
+)
 
 
-# Shows a help message for the given command.
-help_cmd() {
-
-	del_logfile
-	case "$1" in
-		# Aliases
-		'log'|'lg')
-			log_alias '--help'
-			;;
-		'status'|'st')
-			status_alias '--help'
-			;;
-		# Commands
-		'init')
-			init_cmd '--help'
-			;;
-		'save')
-			save_cmd '--help'
-			;;
-		'archi')
-			archi_cmd '--help'
-			;;
-		'submit')
-			submit_cmd '--help'
-			;;
-		'update')
-			update_cmd '--help'
-			;;
-		''|'help'|'-h'|'--help')
-			msg=$(
-				cat <<-EOF
-				${title}(DESCRIPTION)$none
-
-				\t${information}Display the documentation$none associated with a given command.
-
-				${title}(USAGE)$none
-
-				\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
-
-				\tUsage: ${code}tp help <command>$none
-				\tUsage: ${code}tp help$none
-
-				${title}(EXAMPLES)$none
-
-				\t${code}tp help init$none
-				\t${code}tp help submit$none
-				\t${code}tp help log$none
-				\t${code}tp help$none
-				EOF
-			)
-			myecho "$msg"
-			exit 0
-			;;
-		*)
-			myecho "$bold${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
-			exit 1
-			;;
-	esac
-
-}
+##################################################
+#                      MAIN                      #
+##################################################
 
 
-### Main script ###
+cmd="$1"
+shift
 
-case "$1" in
-	# Aliases
-	'version'|'-v'|'--version')
-		shift
-		version_alias "$*"
-		;;
+case "$cmd" in
 	'log'|'lg')
-		shift
-		log_alias "$*"
-		;;
+		log_cmd "$*" ;;
 	'status'|'st')
-		shift
-		status_alias "$*"
-		;;
+		status_cmd "$*" ;;
 	'pull'|'sync')
-		shift
-		pull_alias "$*"
-		;;
-	'cfg'|'conf'|'config'|'configuration')
-		shift
-		config_alias "$*"
-		;;
+		pull_cmd "$*" ;;
 	'test')
-		shift
-		test_alias "$*"
-		;;
-	# Commands
+		test_cmd "$*" ;;
 	'init')
-		shift
-		init_cmd "$*"
-		;;
+		init_cmd "$*" ;;
 	'save')
-		shift
-		save_cmd "$*"
-		;;
+		save_cmd "$*" ;;
 	'archi')
-		shift
-		archi_cmd "$*"
-		;;
+		archi_cmd "$*" ;;
 	'submit')
-		shift
-		submit_cmd "$*"
-		;;
+		submit_cmd "$*" ;;
 	'update')
-		shift
-		update_cmd "$*"
-		;;
+		update_cmd "$*" ;;
 	'help'|'-h'|'--help')
-		shift
-		help_cmd "$*"
+		echo "$1"
+		help_cmd "$*"  ;;
+	'-v'|'--version')
+		myecho "$version"
+		exit 0
 		;;
+	'--config-path')
+		myecho "$conf_path"
+		exit 0
+		;;
+	'-'*|'--'*)
+		die "Unknown option $1" ;;
 	*)
-		del_logfile
-		myecho "${red}Error:$none invalid command $code$1$none. Check out ${code}tp help$none for help."
-		exit 1
-		;;
+		die "Invalid command $1. Check out ${code}tp help$none." ;;
 esac

@@ -1,0 +1,21 @@
+epita-prepa-computer-science-prog-103-p-02-2029-firstname.lastname
+├── Letus_Cleanix
+│   ├── Gaulish.cs
+│   ├── Handler.cs
+│   ├── Human.cs
+│   ├── Legion.cs
+│   ├── Letus_Cleanix.csproj
+│   ├── MagicPotion.cs
+│   ├── Program.cs
+│   ├── Ranks.cs
+│   └── Roman.cs
+├── Tests
+│   └── PutYourTestsHere.cs
+├── .gitignore
+├── Letus_Cleanix.sln
+└── README
+
+
+tree=""
+
+tree="$(sed 1d <<< $tree)"
