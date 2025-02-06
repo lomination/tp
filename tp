@@ -100,11 +100,15 @@ get_config_key() (
 	key="$1"
 	# The default value of the searched key.
 	default="$2"
-    value="$( grep -G "^$key=" "$conf_path" | cut -d'=' -f2 )"
-	if [[ -z "$value" ]]; then
-		echo "$default"
+	if [[ conf_is_valid == 'true' ]]; then
+		value="$( grep -G "^$key=" "$conf_path" | cut -d'=' -f2 )"
+		if [[ -z "$value" ]]; then
+			echo "$default"
+		else
+			echo "$value"
+		fi
 	else
-		echo "$value"
+		echo "$default"
 	fi
 
 )
