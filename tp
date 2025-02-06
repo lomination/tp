@@ -88,8 +88,10 @@ conf_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/
 # Is 'true' or 'false' depending on whether the configuration file exists and is valid.
 conf_is_valid=''
 if [[ -f "$conf_path" ]] && [[ -r "$conf_path" ]]; then
+	echo -e 'Config file found.'
 	conf_is_valid='true'
 else
+	echo -e 'Config file not found.'
 	conf_is_valid='false'
 fi
 
