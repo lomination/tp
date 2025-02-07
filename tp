@@ -328,9 +328,11 @@ help_cmd() {
 			exit 0
 			;;
 		'-'*|'--'*)
-			die "Unknown option $1" ;;
+			die "Unknown option $1"
+			;;
 		*)
-			die "Invalid command $1. Check out ${code}tp help$none." ;;
+			die "Invalid command $1. Check out ${code}tp help$none."
+			;;
 	esac
 
 }
@@ -845,34 +847,17 @@ update_cmd() {
 				myecho "$help_msg"
 				exit 0
 				;;
-			'-a'|'--add')
-				added_files="$added_files $2"
-				shift 2
-				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
 				;;
 			*)
-				positional_args+=("$1")
-				shift
+				die "Unexpected argument $1"
 				;;
 		esac
 	done
 
 	# Restore positional parameters
 	set -- "${positional_args[@]}"
-
-	# Display help
-	if [[ "$1" == '--help' || "$1" == '-h' || "$1" == '-?' ]]; then
-		del_logfile
-		msg=$(
-			cat <<-EOF
-			
-			EOF
-		)
-		myecho "$msg"
-		exit 0
-	fi
 
 	# Find the paht to this script
 	log 'Finding the tp file'
