@@ -755,6 +755,7 @@ submit_cmd() {
 			'-f'|'--force')
 				force='true'
 				shift
+				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
 				;;
