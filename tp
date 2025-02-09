@@ -882,7 +882,7 @@ update_cmd() {
 	# Get the newest version
 	log 'Downloading the newest version from the remote'
 	new_version_path="$( mktemp '/tmp/tp-new-version-XXXXXXXXXXXXXXXXXXXX') " || die
-	curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp' > "$new_version_path" || die
+	wget -O "$new_version_path" 'https://github.com/lomination/tp/releases/latest/download/tp' || die
 
 	# Determine if an upgrade is needed
 	log 'Comparing remote version with local one'
