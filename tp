@@ -13,6 +13,9 @@
 # The version of this script.
 version='0.1.0'
 
+# The path to this file.
+tp_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 # The date.
 curr_date="$( date +'%Y-%m-%d' )"
 # The time.
@@ -84,7 +87,7 @@ warning="$yellow"
 
 
 # The path to the configuration file.
-conf_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/tp.conf"
+conf_path="$tp_path/tp.conf"
 # Is 'true' or 'false' depending on whether the configuration file exists and is valid.
 conf_is_valid=''
 if [[ -f "$conf_path" ]] && [[ -r "$conf_path" ]]; then
@@ -138,7 +141,7 @@ log() {
 
 	echo -e ">>> $*" # echoing to logfile
 	if [[ "$conf_log_on_std" == 'true' ]]; then
-		myecho "$decrease$msg...$none" # echoing to stdout
+		myecho "$decrease$*...$none" # echoing to stdout
 	fi
 
 }
@@ -147,8 +150,7 @@ log() {
 # Prints a warning in the standard output and in the log file.
 warn() {
 
-	msg="$*"
-	if [[ -z "$msg" ]]; then
+	if [[ -z "$*" ]]; then
 		echo -e "Warning."
 		myecho "${yellow}Warning.$none"
 	else
@@ -221,8 +223,8 @@ archi_cmd() {
 		EOF
 	)"
 
-	# The array containing the positional arguments given as parameter to this function.
-	positional_args=()
+	# Allows pushing a tag with unstaged changes.
+	force='false'
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
@@ -230,26 +232,22 @@ archi_cmd() {
 				myecho "$help_msg"
 				exit 0
 				;;
-			'-a'|'--add')
-				added_files="$added_files $2"
-				shift 2
+			'-f'|'--force')
+				force='true'
+				shift
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
 				;;
 			*)
-				positional_args+=("$1")
+				die "Unexpected argument $1"
 				shift
 				;;
 		esac
 	done
 
-	# Restore positional parameters
-	set -- "${positional_args[@]}"
-
-	if [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
-		myecho "${red}Error:$none there are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
-		exit 0
+	if [[ "$force" != 'true' ]] && [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
+		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
 	fi
 
 	# The name of the git tag.
@@ -370,8 +368,12 @@ init_cmd() {
 	create_readme='true'
 	# The content of the REAMDE. If empty, the default value is the title of the practical.
 	readme_content=''
-	# The local name of the clone repository. If empty, the default value is the title of the practicals.
+	# The name of directory of the clone repository. If empty, the default value is the title of the practical.
 	directory_name=''
+	# Whether the first commit should be pushed or not. Set to true by default.
+	push='true'
+	# Whether a test project should be created or not. By default, set to true.
+	create_test='true'
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
@@ -379,7 +381,7 @@ init_cmd() {
 				myecho "$help_msg"
 				exit 0
 				;;
-			'--name')
+			'--directory-name')
 				directory_name="$2"
 				shift 2
 				;;
@@ -389,6 +391,15 @@ init_cmd() {
 				;;
 			'--no-readme')
 				create_readme='false'
+				shift
+				;;
+			'--no-push')
+				push='false'
+				shift
+				;;
+			'--no-test'|'--no-tests')
+				create_test='false'
+				shift
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -417,12 +428,17 @@ init_cmd() {
 		die "Missing required argument 'git_url' at position 2. Check out ${code}tp help init$none."
 	fi
 
+	# Set the name of the clone directory to the name of the practical if no value has been given.
+	if [[ -z "$directory_name" ]]; then
+		directory_name="$title"
+	fi
+
 	# Clone the git repository
 	log 'Cloning the repository'
-	git clone "$git_url" "$title" || die 'Failed to clone the git repository.'
+	git clone "$git_url" "$directory_name" || die 'Failed to clone the git repository.'
 
 	# Go to the cloned repository
-	cd "$title"
+	cd "$directory_name" || die "Failed to enter the directory $directory_name."
 
 	# Create dotnet solution
 	log 'Creating the dotnet solution'
@@ -434,23 +450,36 @@ init_cmd() {
 	dotnet sln add "$title/$title.csproj" || die 'Failed to add the main project to the dotnet solution.'
 
 	# Create test project
-	log 'Creating the dotnet xunit project'
-	dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die 'Failed to create the XUnit test project.'
-	dotnet sln add 'Tests/Tests.csproj' || die 'Failed to add the test project to the dotnet solution.'
-	rm 'Tests/UnitTest1.cs' || warn 'Failed to remove the unit test file template Tests/UnitTest1.cs.'
-	dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die 'Failed to add reference between the test project and the main project.'
-	echo -e "\nglobal using $title;\n" >> 'Tests/GlobalUsings.cs' || warn 'Failed to add the main namespace in the Usings file.'
+	if [[ "$create_test" != 'false' ]]; then
+		log 'Creating the dotnet xunit project'
+		dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die 'Failed to create the XUnit test project.'
+		dotnet sln add 'Tests/Tests.csproj' || die 'Failed to add the test project to the dotnet solution.'
+		rm 'Tests/UnitTest1.cs' || warn 'Failed to remove the unit test file template Tests/UnitTest1.cs.'
+		dotnet add Tests/Tests.csproj reference "$title/$title.csproj" || die 'Failed to add reference between the test project and the main project.'
+		echo -e "\nglobal using $title;\n" >> 'Tests/GlobalUsings.cs' || warn 'Failed to add the main namespace in the Usings file.'
+	fi
 
-	# Create the .gitignore and README files
-	log 'Creating the .gitignore and README files'
+	# Create the .gitignore file
+	log 'Creating the .gitignore file'
 	echo -e 'bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user\n.vscode' > .gitignore || die
-	echo "$title" > README || die
+
+	# Create the README file
+	if [[ "$create_readme" != 'false' ]]; then
+		log 'Creating the README file'
+		if [[ -z "$readme_content" ]]; then
+			readme_content="# $title"
+		fi
+		echo "$readme_content" > README || die
+	fi
 
 	# Push the changes on the remote
-	log 'Synchronizing the git remote'
+	log 'Saving changes with git'
 	git add -A || die
 	git commit -m 'First commit'  || die
-	git push || die
+	if [[ "$push" != 'false' ]]; then
+		log 'Synchronizing the git remote'
+		git push || die
+	fi
 
 	success
 
@@ -623,7 +652,9 @@ save_cmd() {
 	else
 		git add "$added_files" || die 'Failed to add given files to the git index.'
 	fi
-	[[ "$conf_list_added_changes" == 'true' ]] && git diff --name-status >&3
+	if [[ "$conf_list_added_changes" == 'true' ]]; then
+		git diff --name-status >&3 || warn 'Failed to print added changes.'
+	fi
 	git commit -m "$commit" || die 'Failed to create the git commit.'
 
 	# Push the commit
@@ -712,6 +743,8 @@ submit_cmd() {
 
 	# The array containing the positional arguments given as parameter to this function.
 	positional_args=()
+	# Allows to push a tag with unstaged changes.
+	force='false'
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
@@ -719,26 +752,20 @@ submit_cmd() {
 				myecho "$help_msg"
 				exit 0
 				;;
-			'-a'|'--add')
-				added_files="$added_files $2"
-				shift 2
-				;;
+			'-f'|'--force')
+				force='true'
+				shift
 			'-'*|'--'*)
 				die "Unknown option $1"
 				;;
 			*)
-				positional_args+=("$1")
-				shift
+				die "Unexpected argument $1"
 				;;
 		esac
 	done
 
-	# Restore positional parameters
-	set -- "${positional_args[@]}"
-
-	if [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
+	if [[ "$force" != 'true' ]] && [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
 		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
-		exit 0
 	fi
 
 	# The number the user must enter
@@ -746,17 +773,16 @@ submit_cmd() {
 	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag ?$none\nPlease enter the following number to validate: $underline$num$none. Press enter with an invalid input to exit."
 	read -p '> ' input
 	if [[ "$input" -ne "$num" ]]; then
-		del_logfile
 		myecho 'Invalid code. Command canceled!'
 		exit 0
 	fi
-	myecho 'Valid input'
+	myecho 'Valid input.'
 
 	# Choose a tag name
 	if [[ -n "$1" ]]; then
 		commit="$1"
 	else
-		commit="$(openssl rand -hex 4)"
+		commit="$( openssl rand -hex 4 )"
 	fi
 
 	# Create a tag
@@ -838,9 +864,6 @@ update_cmd() {
 		EOF
 	)"
 
-	# The array containing the positional arguments given as parameter to this function.
-	positional_args=()
-
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
@@ -856,33 +879,23 @@ update_cmd() {
 		esac
 	done
 
-	# Restore positional parameters
-	set -- "${positional_args[@]}"
-
-	# Find the paht to this script
-	log 'Finding the tp file'
-	tp_path="$(which 'tp')" || die 'Could not locate the tp script.'
-
 	# Get the newest version
 	log 'Downloading the newest version from the remote'
-	new_version_path=$(mktemp "/tmp/tp-version-XXXXXXXXXXXXXXXXXXXX") || die
+	new_version_path="$( mktemp '/tmp/tp-new-version-XXXXXXXXXXXXXXXXXXXX') " || die
 	curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp' > "$new_version_path" || die
 
 	# Determine if an upgrade is needed
 	log 'Comparing remote version with local one'
-	if cmp "$tp_path" "$new_version_path" ; then
-		success 'The local version is already up-to-date!' >&3
+	if cmp "$tp_path/tp" "$new_version_path" ; then
+		success 'The local version is already up-to-date!'
 	else
 		# Create the update script
 		log 'Creating the update script'
 		# The path to the update script
-		update_script_path="$(mktemp '/tmp/tp-version-XXXXXXXXXXXXXXXXXXXX')"
+		update_script_path="$( mktemp '/tmp/tp-update-script-XXXXXXXXXXXXXXXXXXXX') "
 		# Write out the update script
 		cat > "$update_script_path" <<-EOF
 		#!/usr/bin/env bash
-
-		exec 3>&1
-		exec &> $logfile
 
 		die() {
 			echo -e "Fatal error: \$1"
@@ -891,8 +904,8 @@ update_cmd() {
 		}
 
 		rm '$update_script_path'
-		mv '$new_version_path' '$tp_path' || die 'Failed to move the new version.'
-		chmod +x '$tp_path' || die 'Failed to make the new script executable'
+		mv '$new_version_path' '$tp_path/tp' || die 'Failed to move the new version.'
+		chmod +x '$tp_path/tp' || die 'Failed to make the new script executable'
 
 		rm '$logfile'
 		echo -e '$bold${green}Successfully updated!' >&3
@@ -918,34 +931,34 @@ shift
 
 case "$first" in
 	'log'|'lg')
-		log_cmd "$*"
+		log_cmd "$@"
 		;;
 	'status'|'st')
-		status_cmd "$*"
+		status_cmd "$@"
 		;;
 	'pull'|'sync')
-		pull_cmd "$*"
+		pull_cmd "$@"
 		;;
 	'test')
-		test_cmd "$*"
+		test_cmd "$@"
 		;;
 	'init')
-		init_cmd "$*"
+		init_cmd "$@"
 		;;
 	'save')
-		save_cmd "$*"
+		save_cmd "$@"
 		;;
 	'archi')
-		archi_cmd "$*"
+		archi_cmd "$@"
 		;;
 	'submit')
-		submit_cmd "$*"
+		submit_cmd "$@"
 		;;
 	'update')
-		update_cmd "$*"
+		update_cmd "$@"
 		;;
 	'help'|'-h'|'--help')
-		help_cmd "$*"
+		help_cmd "$@"
 		;;
 	'-v'|'--version')
 		myecho "$version"
