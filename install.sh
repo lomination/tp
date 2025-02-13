@@ -11,7 +11,7 @@ if ! [[ -d "afs/.bin" ]]; then
     exit 1
 fi
 
-curl "https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp" > 'afs/.bin/tp'
+wget -O 'afs/.bin/tp' 'https://github.com/lomination/tp/releases/latest/download/tp'
 chmod +x 'afs/.bin/tp'
 
 tp_path="$(pwd)/afs/.bin/"

@@ -250,8 +250,6 @@ archi_cmd() {
 		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
 	fi
 
-	# The name of the git tag.
-	tag_name=''
 	# Choose a tag name
 	if [[ -n "$1" ]]; then
 		tag_name="$1"
@@ -760,7 +758,8 @@ submit_cmd() {
 				die "Unknown option $1"
 				;;
 			*)
-				die "Unexpected argument $1"
+				positional_args+=("$1")
+				shift
 				;;
 		esac
 	done
@@ -781,14 +780,14 @@ submit_cmd() {
 
 	# Choose a tag name
 	if [[ -n "$1" ]]; then
-		commit="$1"
+		tag_name="$1"
 	else
-		commit="$( openssl rand -hex 4 )"
+		tag_name="$( openssl rand -hex 4 )"
 	fi
 
 	# Create a tag
 	log 'Creating the tag'
-	git tag -ma "submit-$tag" || die
+	git tag -ma "submit-$tag_name" || die
 
 	# Push the tag and the commit
 	log 'Synchronizing the git remote'
@@ -834,7 +833,7 @@ test_cmd() {
 		esac
 	done
 
-	dotnet test --nologo -v q
+	dotnet test --nologo -v q >&3
 	dotnet clean &> /dev/null
 
 }
