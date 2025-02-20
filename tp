@@ -223,7 +223,9 @@ archi_cmd() {
 		EOF
 	)"
 
-	# Allows pushing a tag with unstaged changes.
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+	# Allows to push a tag with unstaged changes.
 	force='false'
 
 	while [[ "$#" -gt 0 ]]; do
@@ -240,11 +242,14 @@ archi_cmd() {
 				die "Unknown option $1"
 				;;
 			*)
-				die "Unexpected argument $1"
+				positional_args+=("$1")
 				shift
 				;;
 		esac
 	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
 
 	if [[ "$force" != 'true' ]] && [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
 		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
@@ -763,6 +768,9 @@ submit_cmd() {
 				;;
 		esac
 	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
 
 	if [[ "$force" != 'true' ]] && [[ "$( git status --porcelain | wc -l )" != '0' ]]; then
 		die "There are uncommitted changes in the workig directory. Make sure to save them before using ${code}tp save$none before using this command."
