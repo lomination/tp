@@ -74,7 +74,7 @@ code="$italics$green"
 # The style for the important information.
 information="$underline"
 # The style for title display.
-title="$bold$reverse"
+title="$bold$underline"
 # The style for a note display in any documentation paragraph.
 note="$blue"
 # The style for a warning display in any documentation paragraph.
@@ -136,13 +136,20 @@ myecho() {
 
 }
 
-# Logs the given message. Writes it in the logfile and the standard output if conf_log_on_std is set to 'true'.
-log() {
+# Echoes the given information. Writes it in the logfile and the standard output if conf_log_on_std is set to 'true'.
+echoinfo() {
 
 	echo -e ">>> $*" # echoing to logfile
 	if [[ "$conf_log_on_std" == 'true' ]]; then
 		myecho "$decrease$*...$none" # echoing to stdout
 	fi
+
+}
+
+# Logs the given message into the logfile.
+logs() {
+
+	echo -e "$*"
 
 }
 
@@ -199,27 +206,25 @@ archi_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp archi\` submits an archi tag to the moulinette. It requires to have no unstaged change in the current git index.
 
-		\tThe ${code}tp archi$none submits an ${information}archi tag$none to the mouli.
+		It takes as argument the name of the tag. If none is given, a random one is generated using \`openssl rand -hex 4\`. The name of the tag should not contain the prefix 'archi-' since it is automatically added.
 
-		\t${note}It there are uncommitted changes in the working directory, the command will be automatically cancelled.
+		${title}USAGE:$none
 
-		${title}(USAGE)$none
+		\ttp archi [-f] [<tagname>]
 
-		\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+		${title}OPTIONS:$none
 
-		\t${note}The name of the archi tag should not contain the prefix 'archi-' since it is automatically added.
+		\t-f, --force: Allow to push even with unstaged changes.
 
-		\tUsages:
-		\t- ${code}tp archi <tag_name>$none
-		\t- ${code}tp archi$none
+		\t-h, --help: Show this message.
 
-		${title}(EXAMPLES)$none
+		${title}EXAMPLES:$none
 
-		\t${code}tp archi "first"$none
-		\t${code}tp archi "0"$none
-		\t${code}tp archi$none
+		\ttp archi first # => archi-first
+
+		\ttp archi       # => archi-2e7970a9
 		EOF
 	)"
 
@@ -257,17 +262,17 @@ archi_cmd() {
 
 	# Choose a tag name
 	if [[ -n "$1" ]]; then
-		tag_name="$1"
+		tagname="$1"
 	else
-		tag_name="$( openssl rand -hex 4 )"
+		tagname="$( openssl rand -hex 4 )"
 	fi
 
 	# Create a tag
-	log 'Creating the tag'
-	git tag -ma "archi-$tag_name" || die 'Failed to create the git tag.'
+	echoinfo 'Creating the tag'
+	git tag -ma "archi-$tagname" || die 'Failed to create the git tag.'
 
 	# Push the tag and the commit
-	log 'Synchronizing the git remote'
+	echoinfo 'Synchronizing the git remote'
 	git push --follow-tags || die 'Failed to push to the remote repository.'
 
 	success
@@ -285,23 +290,19 @@ help_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp help\` displays the documentation associated with a given command. It can take as argument the name of a command.
 
-		\t${information}Display the documentation$none associated with a given command.
+		The commands are: log, status, test, init, save, archi, submit, update.
 
-		${title}(USAGE)$none
+		${title}USAGE:$none
 
-		\tIt takes as parameter a ${information}command$none among ${code}init$none, ${code}save$none, ${code}archi$none, ${code}submit$none, ${code}update$none, ${code}log$none, ${code}status$none, ${code}pull$none, ${code}config$none, ${code}test$none, and ${code}help$none.
+		\ttp help [<command>]
 
-		\tUsage: ${code}tp help <command>$none
-		\tUsage: ${code}tp help$none
+		${title}EXAMPLES:$none
 
-		${title}(EXAMPLES)$none
+		\ttp help init
 
-		\t${code}tp help init$none
-		\t${code}tp help submit$none
-		\t${code}tp help log$none
-		\t${code}tp help$none
+		\ttp help
 		EOF
 	)"
 
@@ -310,8 +311,6 @@ help_cmd() {
 			log_cmd '--help' ;;
 		'status'|'st')
 			status_cmd '--help' ;;
-		'pull'|'sync')
-			pull_cmd '--help' ;;
 		'test')
 			test_cmd '--help' ;;
 		'init')
@@ -349,19 +348,35 @@ init_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp init\` command can be used to easily set-up the dotnet solution and project required for your practical.
+		
+		It should be used only once at the beginning of your practical. In details, this command clones your repo, creates the main and the test C# projects, then adds default .gitignore and README files and finally commits and pushes the work.
 
-		\tThe ${code}tp init$none command makes the beginning of your practical ${information}quicker$none and ${information}easier$none. It should be used ${information}only once$none at the beginning of your practical. This command clones your repo, creates the main and the test C# solutions, then adds default .gitignore and README files and finally commits and pushes the work.
+		It takes as argument the name of the practical and the url to the git remote.
 
-		${title}(USAGE)$none
+		${title}USAGE:$none
 
-		\tIt takes as parameter the title of the ${information}current practical's title$none and the ${information}git url${none} of the empty repo to clone. Both can be found on the intra forge's web site.
+		\ttp init [--dir-name <directoryname>] [--readme <readmecontent> | --no-readme] [--no-push] [--no-test] <title> <giturl>
 
-		\tUsage: ${code}tp init <title> <git_url>${none}
+		${title}OPTIONS:$none
 
-		${title}(EXAMPLES)$none
+		\t--dir[ectory]-name <directoryname>: Change the name of the cloned directory to the given one. By default, its name is the title of the practical.
 
-		\t${code}tp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"$none
+		\t--readme <readmecontent>: Write the given content into the README file. By default, since it must not be empty, it contains the title of the practical.
+
+		\t--no-readme: Skip the creation of the README file.
+
+		\t--no-push: Skip the push of the first committo the remote.
+
+		\t--no-test[s]: Sjip the creation of the XUnit project. Remainder: you are not a perfect programmer.
+
+		\t-h, --help: Show this message.
+
+		${title}EXAMPLES:$none
+
+		\ttp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"
+
+		\ttp init --dir-name tp3 --readme "This is a cool readme file!" "GaulishMall" "..."
 		EOF
 	)"
 
@@ -384,7 +399,7 @@ init_cmd() {
 				myecho "$help_msg"
 				exit 0
 				;;
-			'--directory-name')
+			'--dir-name'|'--directory-name')
 				directory_name="$2"
 				shift 2
 				;;
@@ -423,7 +438,7 @@ init_cmd() {
 	git_url="$2"
 
 	# Check if the given arguments are valid
-	log 'Checking arguments'
+	echoinfo 'Checking arguments'
 	if [[ -z "$title" ]]; then
 		die "Missing required argument 'title' at position 1. Check out ${code}tp help init$none."
 	fi
@@ -437,24 +452,24 @@ init_cmd() {
 	fi
 
 	# Clone the git repository
-	log 'Cloning the repository'
+	echoinfo 'Cloning the repository'
 	git clone "$git_url" "$directory_name" || die 'Failed to clone the git repository.'
 
 	# Go to the cloned repository
 	cd "$directory_name" || die "Failed to enter the directory $directory_name."
 
 	# Create dotnet solution
-	log 'Creating the dotnet solution'
+	echoinfo 'Creating the dotnet solution'
 	dotnet new sln --name "$title" || die 'Failed to create the dotnet solution.'
 
 	# Create main project
-	log 'Creating the dotnet console project'
+	echoinfo 'Creating the dotnet console project'
 	dotnet new console -n "$title" -f net7.0 -lang 'C#' || die 'Failed to create the main project.'
 	dotnet sln add "$title/$title.csproj" || die 'Failed to add the main project to the dotnet solution.'
 
 	# Create test project
 	if [[ "$create_test" != 'false' ]]; then
-		log 'Creating the dotnet xunit project'
+		echoinfo 'Creating the dotnet xunit project'
 		dotnet new xunit -n 'Tests' -f net7.0 -lang 'C#' || die 'Failed to create the XUnit test project.'
 		dotnet sln add 'Tests/Tests.csproj' || die 'Failed to add the test project to the dotnet solution.'
 		rm 'Tests/UnitTest1.cs' || warn 'Failed to remove the unit test file template Tests/UnitTest1.cs.'
@@ -463,12 +478,12 @@ init_cmd() {
 	fi
 
 	# Create the .gitignore file
-	log 'Creating the .gitignore file'
+	echoinfo 'Creating the .gitignore file'
 	echo -e 'bin/\nobj/\n\n.idea/\n*~\n*.DotSettings.user\n.vscode' > .gitignore || die
 
 	# Create the README file
 	if [[ "$create_readme" != 'false' ]]; then
-		log 'Creating the README file'
+		echoinfo 'Creating the README file'
 		if [[ -z "$readme_content" ]]; then
 			readme_content="# $title"
 		fi
@@ -476,11 +491,11 @@ init_cmd() {
 	fi
 
 	# Push the changes on the remote
-	log 'Saving changes with git'
+	echoinfo 'Saving changes with git'
 	git add -A || die
 	git commit -m 'First commit'  || die
 	if [[ "$push" != 'false' ]]; then
-		log 'Synchronizing the git remote'
+		echoinfo 'Synchronizing the git remote'
 		git push || die
 	fi
 
@@ -499,13 +514,15 @@ log_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp log\` command is a pretty alias for git log. It shows the commit logs.
 
-		\tThis command is an alias of the ${code}git log$none command.
+		${title}USAGE:$none
 
-		${title}(EXAMPLE)$none
+		\ttp log
 
-		\t${code}tp log$none
+		${title}OPTIONS:$none
+
+		\t-h, --help: Show this message.
 		EOF
 	)"
 
@@ -530,51 +547,6 @@ log_cmd() {
 
 
 ##################################################
-#                 PULL COMMAND                   #
-##################################################
-
-
-pull_cmd() {
-
-	# Display the help and exit the script.
-	help_msg="$(
-		cat <<-EOF
-		${title}(DESCRIPTION)$none
-
-		\tThis command is an alias of the ${code}git pull$none command.
-
-		${title}(EXAMPLE)$none
-
-		\t${code}tp pull$none
-		EOF
-	)"
-
-	while [[ "$#" -gt 0 ]]; do
-		case "$1" in
-			'-h'|'--help')
-				myecho "$help_msg"
-				exit 0
-				;;
-			'-'*|'--'*)
-				die "Unknown option $1"
-				;;
-			*)
-				die "Unexpected argument $1"
-				;;
-		esac
-	done
-
-	if git status -uno | grep -q "Your branch is behind" ; then
-		git pull >&3 || die 'Failed to pull from remote.'
-		success
-	else
-		success 'The repository is already up-to-date.'
-	fi
-
-}
-
-
-##################################################
 #                  SAVE COMMAND                  #
 ##################################################
 
@@ -584,24 +556,31 @@ save_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp save\` command save the changes of the files of the practical. In details, it add all the changed files, commit them and push the commit to the remote.
 
-		\tThis command is a shortcut for ${information}git add$none, ${information}git commit$none and ${information}git push$none.
+		It takes as argument the name of the commit that will be created and pushed. If none is given, a random one is generated using openssl rand -hex 4.
 
-		\t${warn}It adds every current changes in the repository. Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
+		Make sure to have an appropriate .gitignore file to avoid pushing trash file on the remote!
+		
+		${title}USAGE:$none
 
-		${title}(USAGE)$none
+		tp save [-a <file>] [--no-push] [<commitname>]
 
-		\tIt takes as parameter the ${information}name of the commit$none that will be created and pushed. If none is given, a ${information}random one is generated$none.
+		${title}OPTIONS:$none
 
-		\tUsages:
-		\t- ${code}tp save <commit_name>${none}
-		\t- ${code}tp save${none}
+		\t-a <file>, --add <file>: Add the given file instead of adding all changed files.
 
-		${title}(EXAMPLES)$none
-		\t
-		\t${code}tp save "Fix NegaFibonacci encoding algorithm"$none
-		\t${code}tp save$none
+		\t--no-push: Skip the push of the commit to the remote.
+
+		\t-h, --help: Show this message.
+
+		${title}EXAMPLES:$none
+
+		\ttp save "Fix NegaFibonacci encoding algorithm"
+		
+		\ttp save -a README -- Update the README file
+
+		\ttp save -a Truc.cs -a Machin.cs --no-push Truc\\ and \\ Machin\\ ok!
 		EOF
 	)"
 
@@ -609,6 +588,8 @@ save_cmd() {
 	positional_args=()
 	# The files to add to the commit. If empty, add all changed files.
 	added_files=''
+	# Whether the commit will be pushed.
+	push='true'
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
@@ -619,6 +600,10 @@ save_cmd() {
 			'-a'|'--add')
 				added_files="$added_files $2"
 				shift 2
+				;;
+			'--no-push')
+				push='false'
+				shift
 				;;
 			'--')
 				shift
@@ -654,7 +639,7 @@ save_cmd() {
 	fi
 
 	# Commit the changes
-	log 'Committing changes'
+	echoinfo 'Committing changes'
 	if [[ "$added_files" == '' ]]; then
 		git add -A || die 'Failed to add all changed files to the git index.'
 	else
@@ -666,8 +651,10 @@ save_cmd() {
 	git commit -m "$commit" || die 'Failed to create the git commit.'
 
 	# Push the commit
-	log 'Synchronizing the git remote'
-	git push || die 'Failed to push to the remote repository.'
+	if [[ "$push" != 'false' ]]; then
+		echoinfo 'Synchronizing the git remote'
+		git push || die 'Failed to push to the remote repository.'
+	fi
 
 	success
 
@@ -684,13 +671,15 @@ status_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp status\` command is an alias for the git status command.
 
-		\tThis command is an alias of the ${code}git status$none command.
+		${title}USAGE:$none
 
-		${title}(EXAMPLE)$none
+		\ttp status
 
-		\t${code}tp status$none
+		${title}OPTIONS:$none
+
+		\t-h, --help: Show this message.
 		EOF
 	)"
 
@@ -725,27 +714,25 @@ submit_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp submit\` submits a submit tag to the moulinette. It requires to have no unstaged change in the current git index.
 
-		\tThe ${code}tp submit$none submits an ${information}submit tag$none to the mouli.
+		It takes as argument the name of the tag. If none is given, a random one is generated using \`openssl rand -hex 4\`. The name of the tag should not contain the prefix 'submit-' since it is automatically added.
 
-		\t${warn}Make sure you have already submitted an archi tag and that it has a valid output before running this command.
+		${title}USAGE:$none
 
-		${title}(USAGE)$none
+		\ttp submit [-f] [<tagname>]
 
-		\tIt takes as parameters the ${information}name of the tag$none. If none is given, a random one is generated.
+		${title}OPTIONS:$none
 
-		\t${note}The name of the submit tag should not contain the prefix 'submit-' since it is automatically added.
+		\t-f, --force: Allow to push even with unstaged changes.
 
-		\tUsages:
-		\t- ${code}tp submit <tag_name>$none
-		\t- ${code}tp submit$none
+		\t-h, --help: Show this message.
 
-		${title}(EXAMPLES)$none
+		${title}EXAMPLES:$none
 
-		\t${code}tp submit "adamsromance"$none
-		\t${code}tp submit "first-try"$none
-		\t${code}tp submit$none
+		\ttp submit first # => submit-first
+
+		\ttp submit       # => submit-2e7970a9
 		EOF
 	)"
 
@@ -783,14 +770,14 @@ submit_cmd() {
 
 	# Choose a tag name
 	if [[ -n "$1" ]]; then
-		tag_name="$1"
+		tagname="$1"
 	else
-		tag_name="$( openssl rand -hex 4 )"
+		tagname="$( openssl rand -hex 4 )"
 	fi
 
 	# The number the user must enter
 	num="$(shuf -i 100000-999999 -n 1)"
-	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag named submit-$tag_name?$none\nPlease enter the following number to validate: $underline$num$none. Press enter with an invalid input to exit."
+	myecho "${bold}Are you sure that you want to push a ${red}submit$none$bold tag named submit-$tagname?$none\nPlease enter the following number to validate: $underline$num$none. Press enter with an invalid input to exit."
 	read -p '> ' input
 	if [[ "$input" -ne "$num" ]]; then
 		myecho 'Invalid code. Command canceled!'
@@ -799,11 +786,11 @@ submit_cmd() {
 	myecho 'Valid input.'
 
 	# Create a tag
-	log 'Creating the tag'
-	git tag -ma "submit-$tag_name" || die
+	echoinfo 'Creating the tag'
+	git tag -ma "submit-$tagname" || die
 
 	# Push the tag and the commit
-	log 'Synchronizing the git remote'
+	echoinfo 'Synchronizing the git remote'
 	git push --follow-tags || die
 
 	success
@@ -821,13 +808,15 @@ test_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp test\` command run the XUnit project of the solution in the terminal.
 
-		\tThis command runs the tests of the current dotnet solution.
+		${title}USAGE:$none
 
-		${title}(EXAMPLE)$none
+		\ttp test
 
-		\t${code}tp test$none
+		${title}OPTIONS:$none
+
+		\t-h, --help: Show this message.
 		EOF
 	)"
 
@@ -862,18 +851,17 @@ update_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		${title}(DESCRIPTION)$none
+		The \`tp update\` command updates this script. If a newer version of it is available on Github, this command will download it and install it.
 
-		\t${information}Update$none this command if an update is available.
+		This command does not require any administrator permission.
 
-		${title}(USAGE)$none
+		${title}USAGE:$none
 
-		\tUsage: ${code}tp update$none
+		\ttp update
 
-		${title}(EXAMPLES)$none
+		${title}OPTIONS:$none
 
-		\t${code}tp update$none
-		\t${code}tp submit$none
+		\t-h, --help: Show this message.
 		EOF
 	)"
 
@@ -893,17 +881,17 @@ update_cmd() {
 	done
 
 	# Get the newest version
-	log 'Downloading the newest version from the remote'
+	echoinfo 'Downloading the newest version from the remote'
 	new_version_path="$( mktemp '/tmp/tp-new-version-XXXXXXXXXXXXXXXXXXXX') " || die
 	wget -O "$new_version_path" 'https://github.com/lomination/tp/releases/latest/download/tp' || die
 
 	# Determine if an upgrade is needed
-	log 'Comparing remote version with local one'
+	echoinfo 'Comparing remote version with local one'
 	if cmp "$tp_path/tp" "$new_version_path" ; then
 		success 'The local version is already up-to-date!'
 	else
 		# Create the update script
-		log 'Creating the update script'
+		echoinfo 'Creating the update script'
 		# The path to the update script
 		update_script_path="$( mktemp '/tmp/tp-update-script-XXXXXXXXXXXXXXXXXXXX') "
 		# Write out the update script
@@ -924,7 +912,7 @@ update_cmd() {
 		echo -e '$bold${green}Successfully updated!' >&3
 		exit 0
 		EOF
-		log 'Executing the update script'
+		echoinfo 'Executing the update script'
 		# Make the script executable
 		chmod +x "$update_script_path" || die 'Could not make the update script executable'
 		# Run the script
@@ -948,9 +936,6 @@ case "$first" in
 		;;
 	'status'|'st')
 		status_cmd "$@"
-		;;
-	'pull'|'sync')
-		pull_cmd "$@"
 		;;
 	'test')
 		test_cmd "$@"
