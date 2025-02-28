@@ -31,7 +31,7 @@ echo -e "\n### [ ${curr_date} | ${curr_time} ]\n\nCalled with \`$*\`\n" >> "$log
 ##################################################
 
 
-exec 3>&1          # redirect 3 -> 1
+exec 3>&1           # redirect 3 -> 1
 exec &>> "$logfile" # redirect 1 & 2 -> $logfile
 
 
