@@ -11,7 +11,7 @@
 
 
 # The version of this script.
-version='0.1.0'
+version='1.0.3'
 
 # The path to this file.
 tp_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
