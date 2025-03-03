@@ -273,7 +273,7 @@ archi_cmd() {
 
 	# Push the tag and the commit
 	echoinfo 'Synchronizing the git remote'
-	git push --follow-tags || die 'Failed to push to the remote repository.'
+	git push --follow-tag || die 'Failed to push to the remote repository.'
 
 	success
 
@@ -791,7 +791,7 @@ submit_cmd() {
 
 	# Push the tag and the commit
 	echoinfo 'Synchronizing the git remote'
-	git push --follow-tags || die
+	git push --follow-tag || die
 
 	success
 
