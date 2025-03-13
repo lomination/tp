@@ -356,7 +356,7 @@ init_cmd() {
 
 		${title}USAGE:$none
 
-		\ttp init [--dir-name <directoryname>] [--readme <readmecontent> | --no-readme] [--no-push] [--no-test] <title> <giturl>
+		\ttp init [--dir-name <directoryname>] [--readme <readmecontent> | --no-readme] [--no-push] [--no-test] [--magic-archi <tree>] <title> <giturl>
 
 		${title}OPTIONS:$none
 
