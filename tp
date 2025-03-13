@@ -368,7 +368,9 @@ init_cmd() {
 
 		\t--no-push: Skip the push of the first committo the remote.
 
-		\t--no-test[s]: Sjip the creation of the XUnit project. Remainder: you are not a perfect programmer.
+		\t--no-test[s]: Skip the creation of the XUnit project. Remainder: you are not a perfect programmer.
+
+		\t--magic-archi <tree>: Use the magic archi feature with the given tree. It will create files and folders in the repository for it to match the given tree output.
 
 		\t-h, --help: Show this message.
 
@@ -377,6 +379,42 @@ init_cmd() {
 		\ttp init "GaulishMall" "firsname.lastname@git.forge.epita.fr:p/epita-prepa-computer-science/prog-...-2029/epita-prepa-computer-science-prog-...-2029-firstname.lastname.git"
 
 		\ttp init --dir-name tp3 --readme "This is a cool readme file!" "GaulishMall" "..."
+
+		\ttp init SmurfManagement lomi.nation@git.forge.epita.fr... --magic-archi "prog-103-p-05-2028-firstname.lastname
+		\t├── SmurfManagement
+		\t│   ├── Enhancements
+		\t│   │   ├── Inventory.cs
+		\t│   │   ├── ItemSet.cs
+		\t│   │   ├── ItemType.cs
+		\t│   │   ├── Recipe.cs
+		\t│   │   └── Village.cs
+		\t│   ├── Fundamentals
+		\t│   │   ├── Book.cs
+		\t│   │   ├── BookRentable.cs
+		\t│   │   ├── Disc.cs
+		\t│   │   ├── DiscRentable.cs
+		\t│   │   ├── IRentableItem.cs
+		\t│   │   ├── Item.cs
+		\t│   │   ├── Librarian.cs
+		\t│   │   ├── Library.cs
+		\t│   │   ├── RentableInfo.cs
+		\t│   │   ├── Smurf.cs
+		\t│   │   └── Villager.cs
+		\t│   ├── Profimagicciencies
+		\t│   │   ├── Adult.cs
+		\t│   │   ├── Elder.cs
+		\t│   │   ├── ISerializable.cs
+		\t│   │   ├── Kid.cs
+		\t│   │   ├── Serializer.cs
+		\t│   │   ├── SmurfIndividual.cs
+		\t│   │   └── Tree.cs
+		\t│   ├── Program.cs
+		\t│   └── SmurfManagement.csproj
+		\t├── Tests
+		\t│   └── Put your tests here
+		\t├── .gitignore
+		\t├── README
+		\t└── SmurfManagement.sln" --no-push
 		EOF
 	)"
 
