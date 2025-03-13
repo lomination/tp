@@ -511,27 +511,30 @@ init_cmd() {
 	# Create the architecture of the practical ("magic archi")
 	echoinfo 'Running magic archi'
 	if [[ "$magic_archi" != 'false' ]]; then
-		arch_tree="$( sed '1,2d' <<< "$arch_tree" )"
+		arch_tree="$( sed '1,2d' <<< "$arch_tree" )" || die 'Failed to manipulate the given tree'
 		path="./$title"
 		depth='1'
 		while read line; do
 			if [[ "$line" == ├* ]]; then
 				# '├── Tests' has been reached, no more files to create
+				log 'The end of the tree has been reached'
 				break
 			else
+				log "Processing line: $line"
 				# The depth of the current $line
-				curr_depth="$( echo "$line" | grep -o '│   ' | wc -l )"
+				curr_depth="$( echo "$line" | grep -o '│   ' | wc -l )" || die 'Failed to calculate the depth of the line'
 				# Go to the parent directory as many times as needed
 				for ((i="$curr_depth";i<"$depth";i++)); do
-					path="$( dirname "$path" )"
+					path="$( dirname "$path" )" || die "Failed to get the parent directory of the path $path"
 				done
 				depth="$curr_depth"
 				# The name of the file or the directory to create
-				itemname="$( echo "$line" | awk '{print $NF}' )"
+				itemname="$( echo "$line" | awk '{print $NF}' )" || die 'Failed to extract the name of the item'
 				if [[ "$itemname" == *.cs ]]; then
-					cs_namespace="$( tr '/' '.' <<< "${path:2}" )"
-					cs_class="${itemname::-3}"
-					touch "$path/$itemname"
+					log "Creating C# file: $path/$itemname" 
+					cs_namespace="$( tr '/' '.' <<< "${path:2}" )" || die 'Failed to get the corresponding C# namespace'
+					cs_class="${itemname::-3}" || die 'Failed to get the corresponding C# class'
+					touch "$path/$itemname" || die "Failed to create file $itemname in the directory $path"
 					cat > "$path/$itemname" <<-EOF
 					namespace $cs_namespace;
 
@@ -543,20 +546,22 @@ init_cmd() {
 				elif [[ "$itemname" == *.csproj ]]; then
 					log 'Ignoring the .csproj that should already be created.'
 				elif [[ "$itemname" == *.* ]]; then
-					touch "$path/$itemname"
+					log "Creating unknown file: $path/$itemname" 
+					touch "$path/$itemname" || die "Failed to create file $itemname in the directory $path"
 					warn "The file $itemname in $path is neither a C# file nor a directory. It has been created as an empty text file."
 				else
-					mkdir "$path/$itemname" 
+					log "Creating directory: $path/$itemname" 
+					mkdir "$path/$itemname" || die "Failed to create directory $itemname in the directory $path"
 					path="$path/$itemname"
 					depth="$(( $depth+1 ))"
 				fi
 			fi
 		done <<< "$arch_tree"
-		git add -A || die
-		git commit -m 'Magic archi' || die
+		git add -A || die 'Failed to git add'
+		git commit -m 'Magic archi' || die 'Failed to git commit'
 		if [[ "$push" != 'false' ]]; then
 			echoinfo 'Synchronizing the git remote'
-			git push || die
+			git push || die 'Failed to git push'
 		fi
 		myecho 'The magic archi feature may lead to unexpected results. Please verify the created files and folders. If the result is not the one expected, feel free to undo the magic archi with:\ngit revert HEAD\nAnd follow the on-screen instructions.'
 	fi
