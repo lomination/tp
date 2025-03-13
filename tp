@@ -147,7 +147,7 @@ echoinfo() {
 }
 
 # Logs the given message into the logfile.
-logs() {
+log() {
 
 	echo -e "$*"
 
@@ -392,6 +392,10 @@ init_cmd() {
 	push='true'
 	# Whether a test project should be created or not. By default, set to true.
 	create_test='true'
+	# Whether the architecture of the practical given in the guidelines should be created.
+	magic_archi='false'
+	# The tree of the practical, guven in the guidelines.
+	arch_tree=''
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
@@ -418,6 +422,11 @@ init_cmd() {
 			'--no-test'|'--no-tests')
 				create_test='false'
 				shift
+				;;
+			'--magic-archi')
+				magic_archi='true'
+				arch_tree="$2"
+				shift 2
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -493,10 +502,62 @@ init_cmd() {
 	# Push the changes on the remote
 	echoinfo 'Saving changes with git'
 	git add -A || die
-	git commit -m 'First commit'  || die
+	git commit -m 'First commit' || die
 	if [[ "$push" != 'false' ]]; then
 		echoinfo 'Synchronizing the git remote'
 		git push || die
+	fi
+
+	# Create the architecture of the practical ("magic archi")
+	echoinfo 'Running magic archi'
+	if [[ "$magic_archi" != 'false' ]]; then
+		arch_tree="$( sed '1,2d' <<< "$arch_tree" )"
+		path="./$title"
+		depth='1'
+		while read line; do
+			if [[ "$line" == ├* ]]; then
+				# '├── Tests' has been reached, no more files to create
+				break
+			else
+				# The depth of the current $line
+				curr_depth="$( echo "$line" | grep -o '│   ' | wc -l )"
+				# Go to the parent directory as many times as needed
+				for ((i="$curr_depth";i<"$depth";i++)); do
+					path="$( dirname "$path" )"
+				done
+				depth="$curr_depth"
+				# The name of the file or the directory to create
+				itemname="$( echo "$line" | awk '{print $NF}' )"
+				if [[ "$itemname" == *.cs ]]; then
+					cs_namespace="$( tr '/' '.' <<< "${path:2}" )"
+					cs_class="${itemname::-3}"
+					touch "$path/$itemname"
+					cat > "$path/$itemname" <<-EOF
+					namespace $cs_namespace;
+
+					public class $cs_class
+					{
+
+					}
+					EOF
+				elif [[ "$itemname" == *.csproj ]]; then
+					log 'Ignoring the .csproj that should already be created.'
+				elif [[ "$itemname" == *.* ]]; then
+					touch "$path/$itemname"
+					warn "The file $itemname in $path is neither a C# file nor a directory. It has been created as an empty text file."
+				else
+					mkdir "$path/$itemname" 
+					path="$path/$itemname"
+					depth="$(( $depth+1 ))"
+				fi
+			fi
+		done <<< "$arch_tree"
+		git add -A || die
+		git commit -m 'Magic archi' || die
+		if [[ "$push" != 'false' ]]; then
+			echoinfo 'Synchronizing the git remote'
+			git push || die
+		fi
 	fi
 
 	success
