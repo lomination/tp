@@ -558,6 +558,7 @@ init_cmd() {
 			echoinfo 'Synchronizing the git remote'
 			git push || die
 		fi
+		myecho 'The magic archi feature may lead to unexpected results. Please verify the created files and folders. If the result is not the one expected, feel free to undo the magic archi with:\ngit revert HEAD\nAnd follow the on-screen instructions.'
 	fi
 
 	success
