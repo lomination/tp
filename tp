@@ -292,7 +292,7 @@ help_cmd() {
 		cat <<-EOF
 		The \`tp help\` displays the documentation associated with a given command. It can take as argument the name of a command.
 
-		The commands are: log, status, test, init, save, archi, submit, update.
+		The commands are: log, status, test, init, save, archi, submit, tree, update.
 
 		${title}USAGE:$none
 
@@ -947,6 +947,68 @@ test_cmd() {
 
 
 ##################################################
+#                 TREE COMMAND                   #
+##################################################
+
+
+tree_cmd() {
+
+	# Display the help and exit the script.
+	help_msg="$(
+		cat <<-EOF
+		The \`tp tree\` command shows the architecture of the practical. It can be used to see if the practical architecture matches the expected one, given in the guidelines of the subject.
+
+		By default, it prints the tree of the current directory, but a path can be given as argument to specify the location of the practical repository.
+
+		${title}USAGE:$none
+
+		\ttp tree [path]
+
+		${title}OPTIONS:$none
+
+		\t-h, --help: Show this message.
+
+		${title}EXAMPLES:$none
+
+		\ttp tree
+
+		\ttp tree path/to/practical
+		EOF
+	)"
+
+	# The array containing the positional arguments given as parameter to this function.
+	positional_args=()
+
+	while [[ "$#" -gt 0 ]]; do
+		case "$1" in
+			'-h'|'--help')
+				myecho "$help_msg"
+				exit 0
+				;;
+			'-'*|'--'*)
+				die "Unknown option $1"
+				;;
+			*)
+				positional_args+=("$1")
+				shift
+				;;
+		esac
+	done
+
+	# Restore positional parameters
+	set -- "${positional_args[@]}"
+
+	path="$1"
+	if [[ -z "$path" ]]; then
+		path='.'
+	fi
+
+	tree -I 'obj|bin|.idea|.git|.vscode' -a --dirsfirst -- "$path" >& 3
+
+}
+
+
+##################################################
 #                UPDATE COMMAND                  #
 ##################################################
 
@@ -1056,6 +1118,9 @@ case "$first" in
 		;;
 	'submit')
 		submit_cmd "$@"
+		;;
+	'tree')
+		tree_cmd "$@"
 		;;
 	'update')
 		update_cmd "$@"
