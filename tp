@@ -1072,9 +1072,9 @@ case "$first" in
 		exit 0
 		;;
 	'-'*|'--'*)
-		die "Unknown option $1"
+		die "Unknown option $first"
 		;;
 	*)
-		die "Invalid command $1. Check out ${code}tp help$none."
+		die "Invalid command $first. Check out ${code}tp help$none."
 		;;
 esac
