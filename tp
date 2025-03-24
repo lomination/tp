@@ -1018,25 +1018,40 @@ update_cmd() {
 	# Display the help and exit the script.
 	help_msg="$(
 		cat <<-EOF
-		The \`tp update\` command updates this script. If a newer version of it is available on Github, this command will download it and install it.
+		The \`tp update\` command updates this script. If a newer version of it is available on Github, this command will download it and install it. By default, it downloads the version from the latest release.
 
 		This command does not require any administrator permission.
 
 		${title}USAGE:$none
 
-		\ttp update
+		\ttp update [--beta]
 
 		${title}OPTIONS:$none
 
 		\t-h, --help: Show this message.
+
+		\t--beta: Update to the last commit instead of the last release.
+
+		${title}EXAMPLES:$none
+
+		\ttp update
+
+		\ttp update --beta
 		EOF
 	)"
+
+	# Whether the new version is from the latest release or the latest commit
+	use_last_commit='false'
 
 	while [[ "$#" -gt 0 ]]; do
 		case "$1" in
 			'-h'|'--help')
 				myecho "$help_msg"
 				exit 0
+				;;
+			'--beta')
+				use_last_commit='true'
+				shift
 				;;
 			'-'*|'--'*)
 				die "Unknown option $1"
@@ -1047,10 +1062,16 @@ update_cmd() {
 		esac
 	done
 
+	# The url of the new version to be downloaded
+	download_url='https://github.com/lomination/tp/releases/latest/download/tp'
+	if [[ "$use_last_commit" != 'false' ]]; then
+		download_url='https://raw.githubusercontent.com/lomination/tp/refs/heads/main/tp'
+	fi
+
 	# Get the newest version
 	echoinfo 'Downloading the newest version from the remote'
 	new_version_path="$( mktemp '/tmp/tp-new-version-XXXXXXXXXXXXXXXXXXXX') " || die
-	wget -O "$new_version_path" 'https://github.com/lomination/tp/releases/latest/download/tp' || die
+	wget -O "$new_version_path" "$download_url" || die
 
 	# Determine if an upgrade is needed
 	echoinfo 'Comparing remote version with local one'
