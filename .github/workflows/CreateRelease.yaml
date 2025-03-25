@@ -1,0 +1,61 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (example: 1.0.2)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Print release info
+        run: |
+          echo "::notice::Release v${{ inputs.version }} from branch ${{ github.ref_name }}"
+
+      - name: Get new version
+        uses: actions-ecosystem/action-bump-semver@v1
+        id: bump-semver
+        with:
+          current_version: ${{ inputs.version }}
+          level: patch
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Set version and commit changes
+        run: |
+          sed -i 's/^version=.*$/version='\''${{ inputs.version }}'\''/g' tp
+          git commit -am "Set version to ${{ inputs.version }}"
+          git tag -a ${{ inputs.version }} -m "Release v${{ inputs.version }}"
+          sed -i 's/^version=.*$/version='\''${{ steps.bump-semver.outputs.new_version }}-SNAPSHOT'\''/g' tp
+          git commit -am "Set version to ${{ steps.bump-semver.outputs.new_version }}-SNAPSHOT"
+
+      - name: Push changes
+        run: |
+          git push
+          git push --tags
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ inputs.version }}
+          tag_name: ${{ inputs.version }}
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            tp
+            install.sh
