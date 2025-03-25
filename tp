@@ -568,7 +568,12 @@ init_cmd() {
 				depth="$curr_depth"
 				# The name of the file or the directory to create
 				itemname="$( echo "$line" | awk '{print $NF}' )" || die 'Failed to extract the name of the item'
-				if [[ "$itemname" == *.cs ]]; then
+				if [[ "$itemname" == 'Program.cs' ]]; then
+					log "Creating C# $itemname file at $path/"
+					cat > "$path/$itemname" <<-EOF
+					Console.WriteLine("Hello World!");
+					EOF
+				elif [[ "$itemname" == *.cs ]]; then
 					log "Creating C# file: $path/$itemname" 
 					cs_namespace="$( tr '/' '.' <<< "${path:2}" )" || die 'Failed to get the corresponding C# namespace'
 					cs_class="${itemname::-3}" || die 'Failed to get the corresponding C# class'
