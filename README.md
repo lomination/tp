@@ -28,9 +28,9 @@ curl 'https://raw.githubusercontent.com/lomination/tp/refs/heads/main/install.sh
 
 ### Manual installation
 
-Go to the desired directory and download the latest version of the [tp script file](https://github.com/lomination/tp/releases/latest/download/tp) either using manual.
+Go to the desired directory and download the latest version of the [tp script file](https://github.com/lomination/tp/releases/latest/download/tp).
 
-Then, you have to add the path to the `PATH` environment variable to be able to invoke tp as a command in your shell. To do so, open your bashrc file (often `~/.bashrc`) and add the following line (replacing `/path/to/directory/where/tp/is` by the path of the directory where you saved the tp file):
+Then, you have to add the path of the to file to the `PATH` environment variable to be able to invoke tp as a command in your shell. To do so, open your bashrc file (often `~/.bashrc`) and add the following line (replacing `/path/to/directory/where/tp/is` by the path of the directory where you saved the tp file):
 
 ```sh
 export PATH=$PATH:/path/to/directory/where/tp/is
